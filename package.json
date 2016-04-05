@@ -1,0 +1,24 @@
+{
+  "name": "logger",
+  "version": "1.0.0",
+  "description": "Easy-to-use logger",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swanest/logger.git"
+  },
+  "author": "Swanest Inc.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/swanest/logger/issues"
+  },
+  "homepage": "https://github.com/swanest/logger#readme",
+  "dependencies": {
+    "lodash": "^4.7.0",
+    "moment": "^2.12.0",
+    "rollbar": "^0.6.0"
+  }
+}
