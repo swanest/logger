@@ -315,8 +315,12 @@ module.exports = function beautiful(opts) {
 
         //Otherwise we just display
         for (var i = 0; i < args.length; i++) {
-            if (_.isString(args[i]) || _.isFinite(args[i]) || _.isUndefined(args[i]))
+            if (_.isString(args[i]) || _.isFinite(args[i]) || _.isUndefined(args[i])) {
                 line += (args[i] || "undefined") + " ";
+            }
+            else if (_.isFunction(args[i])) {
+                line += '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
+            }
             else if (_.isObject(args[i])) {
                 line += N(1);
                 line += objectFormatter(args[i], " ", 2) + " ";
