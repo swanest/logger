@@ -55,7 +55,7 @@ module.exports = function (opts) {
         if (unclassified.length)
             extra.unclassified = unclassified;
 
-        if (opts.context && _.get(this.config.context, "contents")) {
+        if (opts.context && _.get(this.config, "context.contents")) {
             extra.context = _.isFunction(opts.context) ? opts.context(this.config.context.contents) : this.config.context.contents;
             if (this.config.context.id)
                 extra.idContext = this.config.context.id;

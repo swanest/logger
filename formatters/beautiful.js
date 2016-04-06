@@ -205,8 +205,8 @@ module.exports = function beautiful(opts) {
             line += stylize("[" + this.config.environment + "]", "bold");
         if (opts.namespace && _.isString(this.config.namespace))
             line += stylize("#" + this.config.namespace, "bold", opts.namespaceColor || alphabetColors[this.config.namespace[0]]) + "  ";
-        if (opts.idContext && _.get(this.config.context, "id"))
-            line += stylize(_.get(this.config.context, "id"), "underline") + "  ";
+        if (opts.idContext && _.get(this.config, "context.id"))
+            line += stylize(_.get(this.config, "context.id"), "underline") + "  ";
         if (opts.level)
             line += stylize(level, colorFromLevel[level]) + "  ";
         if (opts.pid)
@@ -215,7 +215,7 @@ module.exports = function beautiful(opts) {
             line += stylize(moment.utc().format(opts.date), colorFromLevel[level]) + "  ";
         if (opts.inBetweenDuration)
             line += stylize("+" + moment.utc().diff(this.config.lastLogged, "ms") + "ms", colorFromLevel[level]) + "  ";
-        if (opts.context && _.get(this.config.context, "contents")) {
+        if (opts.context && _.get(this.config, "context.contents")) {
             line += "\n";
             line += stylize("context:", "black");
             formattedContext = _.isFunction(opts.context) ? opts.context(this.config.context.contents) : this.config.context.contents;
