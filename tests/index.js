@@ -30,9 +30,18 @@ var tracerA = new logLib.Logger({
     }
 });
 
+if (GLOBAL.CustomError == void 0)
+    GLOBAL.CustomError = logLib.CustomError;
+
+
+var newError = new CustomError("codeString", "my message", "next hello", 404, {info: "hello"}, {otherInfo: 3}, "warning");
+
+tracerA.error(newError);
+
+
 tracerA
     .debug('A %s without any %s. Finally:%o', "string", "context", {toBe: "orNotToBe"})
-    .info({color:"green"})
+    .info({print: "lala"})
     .fatal("next error", new Error("a fatal error occured"));
 
 
@@ -41,31 +50,33 @@ var request = {
     client: "Albert",
     task: "opens-the-door",
     extraInfo: {
-        where:"At Albertine's"
+        where: "At Albertine's"
     }
 };
 
 
-var tracerB = tracerA.context(request, function(req){ return req.client+" "+req.task; });
+var tracerB = tracerA.context(request, function (req) {
+    return req.client + " " + req.task;
+});
 //or tracerB = tracerA.context(request, "a string");
 
 //For now, stdOut stream  displays only idContext, we want to show the object extraInfo from request
 //Furthermore, we want this modification to be effective only on tracerB, leaving the stdout's formatter of tracerA unchanged to be able to change the structure of the context object
 tracerB.addStream("stdOut", {
-   formatter: logLib.formatters.beautiful({
-       //namespaceColor:"black"
-       linesBetweenLogs: 1,
-       environment: false,
-       namespace: false,
-       context: function(request){
-           return request.extraInfo;
-       },
-       idContext: true, //Show the idContext if any
-       level: true,
-       pid: false,
-       date: false,
-       inBetweenDuration: true
-   })
+    formatter: logLib.formatters.beautiful({
+        //namespaceColor:"black"
+        linesBetweenLogs: 1,
+        environment: false,
+        namespace: false,
+        context: function (request) {
+            return request.extraInfo;
+        },
+        idContext: true, //Show the idContext if any
+        level: true,
+        pid: false,
+        date: false,
+        inBetweenDuration: true
+    })
 });
 
 
@@ -85,9 +96,6 @@ tracerB.addStream("rollbar", {
         FATAL: true || env == "staging" || env == "production"
     }
 });
-
-
-
 
 
 var circular = {
@@ -116,5 +124,6 @@ tracerB.log("won't be shown");
 tracerA.log("will be shown");
 
 
-setTimeout(function(){}, 5000);
+setTimeout(function () {
+}, 5000);
 

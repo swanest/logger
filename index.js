@@ -122,5 +122,6 @@ Logger.prototype.removeStream = function () {
 module.exports = {
     Logger: Logger,
     streams: require("./streams"),
-    formatters: require("./formatters")
+    formatters: require("./formatters"),
+    CustomError: require("./custom-error")
 };
