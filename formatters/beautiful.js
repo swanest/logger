@@ -238,10 +238,10 @@ module.exports = function beautiful(opts) {
                 index++;
                 argsIndexesToRemove.push(index);
                 var replacingValue = args[index];
-                if (!replacingValue)
-                    return match;
                 if (_.isPlainObject(replacingValue))
                     replacingValue = JSON.stringify(replacingValue);
+                if(_.isFunction(replacingValue))
+                    replacingValue = '[Function: ' + (replacingValue.name === '' ? 'anonymous' : replacingValue.name) + ']';
                 return replacingValue;
             });
             argsIndexesToRemove.forEach(function (ind) {
