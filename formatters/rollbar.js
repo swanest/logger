@@ -2,6 +2,9 @@ var _ = require("lodash");
 
 module.exports = function (opts) {
 
+    if (opts == void 0)
+        opts = {};
+
     return function (args, level) {
 
         args = _.clone(args);

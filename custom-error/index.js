@@ -8,7 +8,7 @@ function CustomError() {
         if (_.isString(arguments[i]) && arguments[i].length > 0) {
             if (arguments[i] == "fatal" || arguments[i] == "warning" || arguments[i] == "notice")
                 level = arguments[i];
-            else if (arguments[i].length < 35 && _.camelCase(arguments[i]) == arguments[i])
+            else if (arguments[i].length < 35 && _.camelCase(arguments[i]) == arguments[i] && !codeString)
                 codeString = arguments[i];
             else // a message
             {
