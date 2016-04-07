@@ -19,8 +19,7 @@ module.exports = function beautiful(opts) {
         inBetweenDuration: true
     });
 
-    var seenObjects = [],
-        colors = {
+    var colors = {
             'bold': [1],
             'italic': [3],
             'underline': [4],
@@ -87,6 +86,8 @@ module.exports = function beautiful(opts) {
     };
 
     function objectFormatter(obj, spaceString, nSpaces, noColor) {
+        this.seenObjects = this.seenObjects || [];
+
         if (!nSpaces)
             nSpaces = 0;
         if (!spaceString)
@@ -122,10 +123,10 @@ module.exports = function beautiful(opts) {
             return out;
         }
         if (_.isObject(obj)) {
-            if (seenObjects.indexOf(obj) !== -1) {
+            if (this.seenObjects.indexOf(obj) !== -1) {
                 return out;
             }
-            seenObjects.push(obj);
+            this.seenObjects.push(obj);
         }
         nSpaces++;
         if (nSpaces > 1)
@@ -153,7 +154,7 @@ module.exports = function beautiful(opts) {
                 kString = stylize(k, noColor || "cyan");
             else if (type == "undefined" || type == "null")
                 kString = stylize(k, noColor || "red");
-            out += currentSpaces + kString + " : " + objectFormatter(obj[k], spaceString, nSpaces, noColor);
+            out += currentSpaces + kString + " : " + objectFormatter.call(this, obj[k], spaceString, nSpaces, noColor);
         }
         return out;
     };
@@ -190,7 +191,6 @@ module.exports = function beautiful(opts) {
     return function (args, level) {
         args = _.clone(args);
 
-        seenObjects = [];
 
         //    namespace: true,
         //    context: true,
@@ -240,7 +240,7 @@ module.exports = function beautiful(opts) {
                 var replacingValue = args[index];
                 if (_.isPlainObject(replacingValue))
                     replacingValue = JSON.stringify(replacingValue);
-                if(_.isFunction(replacingValue))
+                if (_.isFunction(replacingValue))
                     replacingValue = '[Function: ' + (replacingValue.name === '' ? 'anonymous' : replacingValue.name) + ']';
                 return replacingValue;
             });
