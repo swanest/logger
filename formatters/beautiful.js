@@ -86,7 +86,8 @@ module.exports = function beautiful(opts) {
     };
 
     function objectFormatter(obj, spaceString, nSpaces, noColor) {
-        this.seenObjects = this.seenObjects || [];
+        var seenObjects = this.seenObjects || [];
+
 
         if (!nSpaces)
             nSpaces = 0;
@@ -123,10 +124,10 @@ module.exports = function beautiful(opts) {
             return out;
         }
         if (_.isObject(obj)) {
-            if (this.seenObjects.indexOf(obj) !== -1) {
+            if (seenObjects.indexOf(obj) !== -1) {
                 return out;
             }
-            this.seenObjects.push(obj);
+            seenObjects.push(obj);
         }
         nSpaces++;
         if (nSpaces > 1)
@@ -154,7 +155,7 @@ module.exports = function beautiful(opts) {
                 kString = stylize(k, noColor || "cyan");
             else if (type == "undefined" || type == "null")
                 kString = stylize(k, noColor || "red");
-            out += currentSpaces + kString + " : " + objectFormatter.call(this, obj[k], spaceString, nSpaces, noColor);
+            out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: seenObjects}, obj[k], spaceString, nSpaces, noColor);
         }
         return out;
     };
