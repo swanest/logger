@@ -91,9 +91,9 @@ CustomError.prototype.toObject = function toObject(opts) {
         }
     };
 
-    if(_.isArray(opts.omit))
+    if(_.isArray(opts.omit) || _.isString(opts.omit))
         obj.error = _.omit(obj.error, opts.omit);
-    else if(_.isArray(opts.pick))
+    else if(_.isArray(opts.pick) || _.isString(opts.pick))
         obj.error = _.pick(obj.error, opts.pick);
 
     return obj;
