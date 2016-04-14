@@ -73,8 +73,14 @@ CustomError.prototype.use = function use(err) {
     return this;
 };
 
-CustomError.prototype.toObject = function toObject() {
-    return {
+CustomError.prototype.toObject = function toObject(opts) {
+    if(opts == void 0)
+        opts = {};
+
+    if(_.isFunction(opts))
+        return opts.call(this);
+
+    var obj = {
         error: {
             message: this.message,
             level: this.level,
@@ -84,6 +90,17 @@ CustomError.prototype.toObject = function toObject() {
             info: this.info
         }
     };
+
+    if(_.isArray(opts.omit))
+        obj.error = _.omit(obj.error, opts.omit);
+    else if(_.isArray(opts.pick))
+        obj.error = _.pick(obj.error, opts.pick);
+
+    return obj;
 };
+
+CustomError.prototype.toJSON = CustomError.prototype.toObject;
+
+
 
 module.exports = CustomError;
