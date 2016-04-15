@@ -119,7 +119,7 @@ module.exports = function beautiful(opts) {
         } else if (_.isUndefined(obj)) {
             out += stylize(obj + type, noColor || "red");
             return out;
-        } else if (!_.isPlainObject(obj) && !_.isArray(obj)) {
+        } else if (!_.isObject(obj)) {
             out += obj + type;
             return out;
         }
