@@ -99,9 +99,15 @@ tracerB.addStream("rollbar", {
 
 
 var circular = {
-    circular: circular
+    key:{
+        val:1
+    }
 };
-tracerA.debug(circular, "circular");
+
+circular.key.circ = circular;
+
+tracerA.debug(circular);
+tracerA.log("hello %o", circular);
 
 //Compare two objects
 tracerB.debug([1, 2, 3], [4, 5, 6, {complex: true}]);

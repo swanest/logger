@@ -1,5 +1,7 @@
 var _ = require("lodash"),
-    moment = require("moment");
+    moment = require("moment"),
+    util = require("util");
+
 
 module.exports = function beautiful(opts) {
 
@@ -125,7 +127,7 @@ module.exports = function beautiful(opts) {
         }
         if (_.isObject(obj)) {
             if (seenObjects.indexOf(obj) !== -1) {
-                return out;
+                return "(Circular)";
             }
             seenObjects.push(obj);
         }
@@ -240,7 +242,7 @@ module.exports = function beautiful(opts) {
                 argsIndexesToRemove.push(index);
                 var replacingValue = args[index];
                 if (_.isPlainObject(replacingValue))
-                    replacingValue = JSON.stringify(replacingValue);
+                    replacingValue = util.inspect(replacingValue, {showHidden: true, depth: null});
                 if (_.isFunction(replacingValue))
                     replacingValue = '[Function: ' + (replacingValue.name === '' ? 'anonymous' : replacingValue.name) + ']';
                 return replacingValue;
