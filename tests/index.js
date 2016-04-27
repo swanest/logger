@@ -1,5 +1,6 @@
 var logLib = require("../index"),
-    env = process.env.NODE_ENV || "development";
+    env = process.env.NODE_ENV || "development",
+    mongoose = require("mongoose");
 
 var tracerA = new logLib.Logger({
     namespace: "myApp", //define a namespace if you want to be able to activate, deactivate the logging module by passing DEBUG=name as environment variable
@@ -37,6 +38,18 @@ if (GLOBAL.CustomError == void 0)
 var newError = new CustomError("codeString", "my message", "next hello", 404, {info: "hello"}, {otherInfo: 3}, "warning");
 
 tracerA.error(newError);
+
+
+tracerA.log({
+    mongoose: {
+        _id: mongoose.Types.ObjectId('4edd40c86762e0fb12000003'),
+        id : mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toString(),
+        idS : mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toJSON(),
+        lala: "ok",
+        func:function blabla(){}
+
+    }
+});
 
 
 tracerA
@@ -99,8 +112,8 @@ tracerB.addStream("rollbar", {
 
 
 var circular = {
-    key:{
-        val:1
+    key: {
+        val: 1
     }
 };
 

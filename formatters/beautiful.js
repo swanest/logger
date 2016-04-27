@@ -69,6 +69,7 @@ module.exports = function beautiful(opts) {
         return str;
     });
 
+    //Get the specific type
     var customTypeOf = function (inp) {
         if (_.isString(inp) && moment.utc(inp, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
             return "ISOStringDate";
@@ -78,66 +79,70 @@ module.exports = function beautiful(opts) {
             return "momentJSDate";
         else if (_.isArray(inp))
             return "array";
+        else if (_.isFinite(inp))
+            return "number";
+        else if (_.isNaN(inp))
+            return "NaN";
+        else if (_.isFunction(inp))
+            return "function";
         else if (_.isUndefined(inp))
             return "undefined";
         else if (_.isNull(inp))
             return "null";
+        else if (_.isBoolean(inp))
+            return "boolean";
+        else if (inp && _.isFunction(inp.getTimestamp) && _.isFunction(inp.toString) && inp.toString().length == 24)
+            return "ObjectId";
         else {
             return typeof inp;
         }
     };
 
     function objectFormatter(obj, spaceString, nSpaces, noColor) {
-        var seenObjects = this.seenObjects || [];
-
-
         if (!nSpaces)
             nSpaces = 0;
         if (!spaceString)
             spaceString = " ";
-        var currentSpaces = "";
+        var seenObjects = this.seenObjects || [],
+            currentSpaces = "",
+            type = customTypeOf(obj),
+            out = "";
         for (var i = 0; i < nSpaces; i++)
             currentSpaces += spaceString;
-        var type = " [" + customTypeOf(obj) + "]";
-        var out = "";
-        if (obj != void 0 && obj.toISOString != void 0) {
-            out += stylize(obj.toISOString() + type, noColor || 'cyan');
-            return out;
-        } else if (_.isFunction(obj)) {
-            out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || 'cyan');
-            return out;
-        } else if (_.isString(obj)) {
-            out += stylize(obj + type, noColor || "yellow");
-            return out;
-        } else if (_.isFinite(obj)) {
-            out += stylize(obj + type, noColor || "blue");
-            return out;
-        } else if (_.isNull(obj)) {
-            out += stylize(obj + type, noColor || "red");
-            return out;
-        } else if (_.isBoolean(obj)) {
-            out += stylize(obj + type, noColor || "magenta");
-            return out;
-        } else if (_.isUndefined(obj)) {
-            out += stylize(obj + type, noColor || "red");
-            return out;
-        } else if (!_.isObject(obj)) {
-            out += obj + type;
-            return out;
-        }
+        //Prevent circularity
         if (_.isObject(obj)) {
-            if (seenObjects.indexOf(obj) !== -1) {
+            if (seenObjects.indexOf(obj) !== -1)
                 return "(Circular)";
-            }
             seenObjects.push(obj);
+        }
+        //Native display transformation if available
+        if (obj && _.isFunction(obj.toISOString))
+            obj = obj.toISOString();
+        else if (obj && _.isFunction(obj.toJSON))
+            obj = obj.toJSON();
+        var colorsByType = {
+            string: "yellow",
+            number: "blue",
+            null: "red",
+            NaN: "red",
+            undefined: "red",
+            boolean: "magenta",
+            ISOStringDate: "cyan",
+            JSDate: "cyan",
+            momentJSDate: "cyan",
+            function: "cyan"
+        };
+        if (type == "function") {
+            out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || colorsByType[type] || true);
+            return out;
+        } else if (type != "object") {
+            out += stylize(obj + " [" + type + "]", noColor || colorsByType[type] || true);
+            return out;
         }
         nSpaces++;
         if (nSpaces > 1)
             out += type;
         var kString;
-        if (obj && _.isFunction(obj.toJSON)) {
-            obj = obj.toJSON();
-        }
         for (var k in obj) {
             if (!obj.hasOwnProperty(k)) {
                 continue;
@@ -145,18 +150,12 @@ module.exports = function beautiful(opts) {
             out += "\n";
             type = customTypeOf(obj[k]);
             kString = k;
-            if (type == "number")
-                kString = stylize(k, noColor || "blue");
-            else if (type == "array")
+            if (type == "array")
                 kString = stylize(k, noColor || "underline");
             else if (type == "object")
                 kString = stylize(k, noColor || "bold");
-            else if (type == "string")
-                kString = stylize(k, noColor || "yellow");
-            else if (type == "ISOStringDate" || type == "momentJSDate" || type == "JSDate")
-                kString = stylize(k, noColor || "cyan");
-            else if (type == "undefined" || type == "null")
-                kString = stylize(k, noColor || "red");
+            else
+                kString = stylize(k, noColor || colorsByType[type] || true);
             out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: seenObjects}, obj[k], spaceString, nSpaces, noColor);
         }
         return out;
