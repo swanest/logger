@@ -40,13 +40,16 @@ var newError = new CustomError("codeString", "my message", "next hello", 404, {i
 tracerA.error(newError);
 
 
+tracerA.log({arr: [{bebe: 1}, {hdhd: 3}]}, "cool");
+
 tracerA.log({
     mongoose: {
         _id: mongoose.Types.ObjectId('4edd40c86762e0fb12000003'),
-        id : mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toString(),
-        idS : mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toJSON(),
+        id: mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toString(),
+        idS: mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toJSON(),
         lala: "ok",
-        func:function blabla(){}
+        func: function blabla() {
+        }
 
     }
 });

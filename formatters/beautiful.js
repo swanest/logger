@@ -135,13 +135,13 @@ module.exports = function beautiful(opts) {
         if (type == "function") {
             out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || colorsByType[type] || true);
             return out;
-        } else if (type != "object") {
+        } else if (type != "object" && type != "array") {
             out += stylize(obj + " [" + type + "]", noColor || colorsByType[type] || true);
             return out;
         }
         nSpaces++;
         if (nSpaces > 1)
-            out += type;
+            out += "[" + type + "]";
         var kString;
         for (var k in obj) {
             if (!obj.hasOwnProperty(k)) {
@@ -149,13 +149,13 @@ module.exports = function beautiful(opts) {
             }
             out += "\n";
             type = customTypeOf(obj[k]);
-            kString = k;
             if (type == "array")
                 kString = stylize(k, noColor || "underline");
             else if (type == "object")
                 kString = stylize(k, noColor || "bold");
             else
                 kString = stylize(k, noColor || colorsByType[type] || true);
+            //kString = "[" + kString + "]";
             out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: seenObjects}, obj[k], spaceString, nSpaces, noColor);
         }
         return out;
