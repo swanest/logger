@@ -98,23 +98,29 @@ module.exports = function beautiful(opts) {
         }
     };
 
-    function objectFormatter(obj, spaceString, nSpaces, noColor) {
+    function objectFormatter(obj, spaceString, nSpaces, noColor, prevKey) {
         if (!nSpaces)
             nSpaces = 0;
         if (!spaceString)
             spaceString = " ";
-        var seenObjects = this.seenObjects || [],
+        var seenObjects = this.seenObjects || {values: [], keys: []},
+            indF,
             currentSpaces = "",
             type = customTypeOf(obj),
             out = "";
         for (var i = 0; i < nSpaces; i++)
             currentSpaces += spaceString;
+        currentSpaces += "|";
+
         //Prevent circularity
-        if (_.isObject(obj)) {
-            if (seenObjects.indexOf(obj) !== -1)
-                return "(Circular)";
-            seenObjects.push(obj);
+        if (_.isObject(obj) && !_.isFunction(obj)) {
+            indF = seenObjects.values.indexOf(obj);
+            if (indF !== -1)
+                return "(Circular 'key:" + seenObjects.keys[indF] + "' " + (_.get(obj, "constructor.name") || "") + ")";
+            seenObjects.values.push(obj);
+            seenObjects.keys.push(prevKey);
         }
+
         //Native display transformation if available
         if (obj && _.isFunction(obj.toISOString))
             obj = obj.toISOString();
@@ -130,7 +136,9 @@ module.exports = function beautiful(opts) {
             ISOStringDate: "cyan",
             JSDate: "cyan",
             momentJSDate: "cyan",
-            function: "cyan"
+            function: "cyan",
+            array: "underline",
+            object: "bold"
         };
         if (type == "function") {
             out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || colorsByType[type] || true);
@@ -140,24 +148,27 @@ module.exports = function beautiful(opts) {
             return out;
         }
         nSpaces++;
-        if (nSpaces > 1)
-            out += "[" + type + "]";
+
+        var keysSet = _.keys(obj);
+        var pref = "";
+        if (nSpaces > 1) {
+            if (!keysSet.length)
+                pref = "empty ";
+            out += (_.get(obj, "constructor.name") || "") + "[" + pref + type + "]";
+        }
+
+
         var kString;
-        for (var k in obj) {
-            if (!obj.hasOwnProperty(k)) {
-                continue;
-            }
+        keysSet.forEach(function (k) {
+            //if (!obj.hasOwnProperty(k)) {
+            //    continue;
+            //}
             out += "\n";
             type = customTypeOf(obj[k]);
-            if (type == "array")
-                kString = stylize(k, noColor || "underline");
-            else if (type == "object")
-                kString = stylize(k, noColor || "bold");
-            else
-                kString = stylize(k, noColor || colorsByType[type] || true);
+            kString = stylize(k, noColor || colorsByType[type] || true);
             //kString = "[" + kString + "]";
-            out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: seenObjects}, obj[k], spaceString, nSpaces, noColor);
-        }
+            out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: seenObjects}, obj[k], spaceString, nSpaces, noColor, k);
+        })
         return out;
     };
 
@@ -255,7 +266,9 @@ module.exports = function beautiful(opts) {
         //Now, discover each distinct argument
 
         //If 2 args and 2 objects, let's compare
-        if (args.length == 2 && (_.isPlainObject(args[0]) || _.isArray(args[0])) && (_.isPlainObject(args[1]) || _.isArray(args[1]))) {
+        //(_.isPlainObject(args[0]) || _.isArray(args[0])) && (_.isPlainObject(args[1]) || _.isArray(args[1]))
+
+        if (args.length == 2 && _.isObject(args[0]) && _.isObject(args[1])) {
             var a = objectFormatter(args[0], " ", 3, true).split("\n"),
                 b = objectFormatter(args[1], " ", 3, true).split("\n");
             var maxL = _.max([a.length, b.length]),
