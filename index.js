@@ -2,7 +2,7 @@ var _ = require("lodash"),
     moment = require("moment");
 
 var defaultConfig = {
-    environment: "development",
+    environment: process.env.NODE_ENV || "development",
     context: null, //{id:xxxx, contents:req}
     streams: {
         stdOut: {
