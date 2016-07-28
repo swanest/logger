@@ -268,7 +268,7 @@ module.exports = function beautiful(opts) {
         //If 2 args and 2 objects, let's compare
         //(_.isPlainObject(args[0]) || _.isArray(args[0])) && (_.isPlainObject(args[1]) || _.isArray(args[1]))
 
-        if (args.length == 2 && _.isObject(args[0]) && _.isObject(args[1])) {
+        if (args.length == 2 && _.isObject(args[0]) && !(args[0] instanceof Error) && _.isObject(args[1]) && !(args[1] instanceof Error)) {
             var a = objectFormatter(args[0], " ", 3, true).split("\n"),
                 b = objectFormatter(args[1], " ", 3, true).split("\n");
             var maxL = _.max([a.length, b.length]),
