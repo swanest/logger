@@ -28,6 +28,7 @@ function CustomError() {
     }
     var temp = Error.call(this, message || codeString);
     temp.name = this.name = 'Error';
+
     this.stack = temp.stack;
     this.level = level; //notice,warning,fatal
     this.codeString = codeString;
@@ -44,8 +45,10 @@ CustomError.prototype = Object.create(Error.prototype, {
     }
 });
 
-CustomError.prototype.use = function use(err) {
-    if (err instanceof Error) {
+
+CustomError.prototype.use = function use(e) {
+    var err = _.get(e, 'error') || e;
+    if (err instanceof Error || e.error != void 0) {
         err.message && (this.message = err.message);
         err.stack && (this.stack = err.stack);
         err.codeString = (this.codeString = err.codeString);
