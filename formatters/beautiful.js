@@ -103,8 +103,9 @@ module.exports = function beautiful(opts) {
             nSpaces = 0;
         if (!spaceString)
             spaceString = " ";
-        var seenObjects = this.seenObjects || {values: [], keys: []},
-            indF,
+
+        var seenObjects = this.seenObjects || [],
+            found,
             currentSpaces = "",
             type = customTypeOf(obj),
             out = "";
@@ -114,11 +115,13 @@ module.exports = function beautiful(opts) {
 
         //Prevent circularity
         if (_.isObject(obj) && !_.isFunction(obj)) {
-            indF = seenObjects.values.indexOf(obj);
-            if (indF !== -1)
-                return "(Circular 'key:" + seenObjects.keys[indF] + "' " + (_.get(obj, "constructor.name") || "") + ")";
-            seenObjects.values.push(obj);
-            seenObjects.keys.push(prevKey);
+            found = _.find(seenObjects, function (it) {
+                return it.object == obj;
+            });
+            if (found !== void 0) {
+                return "(Circular 'key:" + found.key + "' " + (_.get(obj, "constructor.name") || "") + ")";
+            }
+            seenObjects.push({object: obj, key: prevKey})
         }
 
         //Native display transformation if available
@@ -154,20 +157,18 @@ module.exports = function beautiful(opts) {
         if (nSpaces > 1) {
             if (!keysSet.length)
                 pref = "empty ";
+            else
+                pref = "size="+keysSet.length+",";
             out += (_.get(obj, "constructor.name") || "") + "[" + pref + type + "]";
         }
 
 
         var kString;
         keysSet.forEach(function (k) {
-            //if (!obj.hasOwnProperty(k)) {
-            //    continue;
-            //}
             out += "\n";
             type = customTypeOf(obj[k]);
             kString = stylize(k, noColor || colorsByType[type] || true);
-            //kString = "[" + kString + "]";
-            out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: seenObjects}, obj[k], spaceString, nSpaces, noColor, k);
+            out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: _.clone(seenObjects)}, obj[k], spaceString, nSpaces, noColor, k);
         })
         return out;
     };
@@ -275,11 +276,12 @@ module.exports = function beautiful(opts) {
                 aLongest = _.maxBy(a, "length").length;
             var completeLine = "\n";
             for (var i = 0; i < maxL; i++) {
-                var l = (_.get(a, i) || "" );
-                while (l.length < aLongest)
-                    l += " ";
-                l += "  |     " + (_.get(b, i) || "" ) + N(1);
-                completeLine += l;
+                var al = (_.get(a, i) || "" ), bl = (_.get(b, i) || "" ), separ = "|";
+                if(al == bl) separ = "=";
+                while (al.length < aLongest)
+                    al += " ";
+                al += "  "+separ+"     " + bl + N(1);
+                completeLine += al;
 
             }
             return line + completeLine + N(opts.linesBetweenLogs - 1);
