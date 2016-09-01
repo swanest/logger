@@ -28,7 +28,7 @@ function CustomError() {
     }
     var temp = Error.call(this, message || codeString);
     temp.name = this.name = 'Error';
-
+    this.isCustomError = true;
     this.stack = temp.stack;
     this.level = level; //notice,warning,fatal
     this.codeString = codeString;
@@ -77,10 +77,10 @@ CustomError.prototype.use = function use(e) {
 };
 
 CustomError.prototype.toObject = function toObject(opts) {
-    if(opts == void 0)
+    if (opts == void 0)
         opts = {};
 
-    if(_.isFunction(opts))
+    if (_.isFunction(opts))
         return opts.call(this);
 
     var obj = {
@@ -94,16 +94,15 @@ CustomError.prototype.toObject = function toObject(opts) {
         }
     };
 
-    if(_.isArray(opts.omit) || _.isString(opts.omit))
+    if (_.isArray(opts.omit) || _.isString(opts.omit))
         obj.error = _.omit(obj.error, opts.omit);
-    else if(_.isArray(opts.pick) || _.isString(opts.pick))
+    else if (_.isArray(opts.pick) || _.isString(opts.pick))
         obj.error = _.pick(obj.error, opts.pick);
 
     return obj;
 };
 
 CustomError.prototype.toJSON = CustomError.prototype.toObject;
-
 
 
 module.exports = CustomError;
