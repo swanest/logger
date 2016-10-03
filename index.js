@@ -100,6 +100,8 @@ Logger.prototype.copy = function (overload) {
 
 
 Logger.prototype.context = function (contents, id) {
+    if (arguments.length == 1 && _.isString(arguments[0]))
+        id = arguments[0], contents = null;
     return this.copy({
         context: {
             id: _.isFunction(id) ? id(contents) : id,
