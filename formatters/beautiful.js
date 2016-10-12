@@ -91,6 +91,8 @@ module.exports = function beautiful(opts) {
             return "null";
         else if (_.isBoolean(inp))
             return "boolean";
+        else if (inp instanceof Error)
+            return "error";
         else if (inp && _.isFunction(inp.getTimestamp) && _.isFunction(inp.toString) && inp.toString().length == 24)
             return "ObjectId";
         else {
@@ -129,10 +131,12 @@ module.exports = function beautiful(opts) {
             obj = obj.toISOString();
         else if (obj && _.isFunction(obj.toJSON))
             obj = obj.toJSON();
+
         var colorsByType = {
             string: "yellow",
             number: "blue",
             null: "red",
+            error: "red",
             NaN: "red",
             undefined: "red",
             boolean: "magenta",
@@ -143,23 +147,26 @@ module.exports = function beautiful(opts) {
             array: "underline",
             object: "bold"
         };
+
+
         if (type == "function") {
             out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || colorsByType[type] || true);
             return out;
-        } else if (type != "object" && type != "array") {
+        }
+        else if (type != "error" && type != "object" && type != "array") {
             out += stylize(obj + " [" + type + "]", noColor || colorsByType[type] || true);
             return out;
         }
         nSpaces++;
 
-        var keysSet = _.keys(obj);
+        var keysSet = type == "error" ? Object.getOwnPropertyNames(obj) : _.keys(obj);
         var pref = "";
         if (nSpaces > 1) {
             if (!keysSet.length)
                 pref = "empty ";
             else
-                pref = "size="+keysSet.length+",";
-            out += (_.get(obj, "constructor.name") || "") + "[" + pref + type + "]";
+                pref = "size=" + keysSet.length + ",";
+            out += stylize((_.get(obj, "constructor.name") || "") + "[" + pref + type + "]", noColor || colorsByType[type] || true);
         }
 
 
@@ -277,10 +284,10 @@ module.exports = function beautiful(opts) {
             var completeLine = "\n";
             for (var i = 0; i < maxL; i++) {
                 var al = (_.get(a, i) || "" ), bl = (_.get(b, i) || "" ), separ = "|";
-                if(al == bl) separ = "=";
+                if (al == bl) separ = "=";
                 while (al.length < aLongest)
                     al += " ";
-                al += "  "+separ+"     " + bl + N(1);
+                al += "  " + separ + "     " + bl + N(1);
                 completeLine += al;
 
             }
@@ -314,16 +321,15 @@ module.exports = function beautiful(opts) {
                     unclassified.push(args[i]);
                 }
             }
-
             if (unclassified.length)
                 extra.unclassified = unclassified;
-
 
             if (message)
                 line += stylize(message, "red") + N(1);
 
             if (codeString)
                 line += stylize("(" + (code ? code + ":" : "") + codeString + ")", "red");
+
             line += stylize(error.stack, "red");
             line += objectFormatter({extra: extra}, " ", 2);
             line += N(1);
@@ -332,8 +338,8 @@ module.exports = function beautiful(opts) {
 
         //Otherwise we just display
         for (var i = 0; i < args.length; i++) {
-            if (_.isString(args[i]) || _.isFinite(args[i]) || _.isUndefined(args[i])) {
-                line += (args[i] || "undefined") + " ";
+            if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i])) {
+                line += (args[i].toString()) + " ";
             }
             else if (_.isFunction(args[i])) {
                 line += '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
@@ -341,6 +347,9 @@ module.exports = function beautiful(opts) {
             else if (_.isObject(args[i])) {
                 line += N(1);
                 line += objectFormatter(args[i], " ", 2) + " ";
+            }
+            else if (_.isUndefined(args[i])) {
+                line += "undefined ";
             }
 
         }
