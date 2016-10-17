@@ -47,8 +47,8 @@ CustomError.prototype = Object.create(Error.prototype, {
 
 
 CustomError.prototype.use = function use(e) {
-    var err = _.get(e, 'error') || e;
-    if (err instanceof Error || e.error != void 0) {
+    var err = _.get(e, 'error') || e; //Either a native errorJS or an JSONError
+    if (err && (err instanceof Error || e.error != void 0 || e.isCustomError)) {
         err.message && (this.message = err.message);
         err.stack && (this.stack = err.stack);
         err.codeString = (this.codeString = err.codeString);
@@ -73,6 +73,8 @@ CustomError.prototype.use = function use(e) {
         else
             this.info = err;
     }
+    else
+        throw new CustomError("unusableError");
     return this;
 };
 
@@ -90,7 +92,8 @@ CustomError.prototype.toObject = function toObject(opts) {
             stack: this.stack,
             codeString: this.codeString,
             code: this.code,
-            info: this.info
+            info: this.info,
+            isCustomError: true
         }
     };
 

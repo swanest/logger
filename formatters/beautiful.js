@@ -1,6 +1,7 @@
 var _ = require("lodash"),
     moment = require("moment"),
-    util = require("util");
+    util = require("util"),
+    CustomError = require("../custom-error");
 
 
 module.exports = function beautiful(opts) {
@@ -43,7 +44,7 @@ module.exports = function beautiful(opts) {
             FATAL: 'inverse'
         };
 
-
+    //Empty-line creator
     function N(n) {
         var str = "";
         for (var i = 0; i < n; i++)
@@ -51,7 +52,7 @@ module.exports = function beautiful(opts) {
         return str;
     };
 
-
+    //Colorize text
     var stylize = _.rest(function (str, cols) {
         if (!str)
             return '';
@@ -95,42 +96,23 @@ module.exports = function beautiful(opts) {
             return "error";
         else if (inp && _.isFunction(inp.getTimestamp) && _.isFunction(inp.toString) && inp.toString().length == 24)
             return "ObjectId";
+        else if (_.isPlainObject(inp))
+            return "plainObject";
         else {
             return typeof inp;
         }
     };
 
-    function objectFormatter(obj, spaceString, nSpaces, noColor, prevKey) {
-        if (!nSpaces)
-            nSpaces = 0;
-        if (!spaceString)
-            spaceString = " ";
-
-        var seenObjects = this.seenObjects || [],
-            found,
-            currentSpaces = "",
-            type = customTypeOf(obj),
-            out = "";
+    //Generate a spaces-string
+    function genSpace(initSpace, spaceString, nSpaces) {
+        let sp = initSpace;
         for (var i = 0; i < nSpaces; i++)
-            currentSpaces += spaceString;
-        currentSpaces += "|";
+            sp += spaceString;
+        return sp;
+    };
 
-        //Prevent circularity
-        if (_.isObject(obj) && !_.isFunction(obj)) {
-            found = _.find(seenObjects, function (it) {
-                return it.object == obj;
-            });
-            if (found !== void 0) {
-                return "(Circular 'key:" + found.key + "' " + (_.get(obj, "constructor.name") || "") + ")";
-            }
-            seenObjects.push({object: obj, key: prevKey})
-        }
 
-        //Native display transformation if available
-        if (obj && _.isFunction(obj.toISOString))
-            obj = obj.toISOString();
-        else if (obj && _.isFunction(obj.toJSON))
-            obj = obj.toJSON();
+    function objectFormatter(config) {
 
         var colorsByType = {
             string: "yellow",
@@ -145,38 +127,100 @@ module.exports = function beautiful(opts) {
             momentJSDate: "cyan",
             function: "cyan",
             array: "underline",
-            object: "bold"
+            object: "bold",
+            plainObject: "bold"
         };
+
+        let obj = config.obj,
+            initSpace = config.initSpace || "",
+            spaceString = config.spaceString || " ",
+            nSpaces = config.nSpaces || 1, //indentation space
+            noColor = config.noColor,
+            prevKey = config.prevKey,
+            seenObjects = this.seenObjects || [],
+            found,
+            type = customTypeOf(obj),
+            out = "";
+
+        if (!this.recursive) //First call
+            out += N(1) + initSpace;
+
+        //Prevent circularity
+        if (_.isObject(obj) && !_.isFunction(obj)) {
+            found = _.find(seenObjects, function (it) {
+                return it.object == obj;
+            });
+            if (found !== void 0) {
+                return "(Circular 'key:" + found.key + "' " + (_.get(obj, "constructor.name") || "") + ")";
+            }
+            seenObjects.push({object: obj, key: prevKey})
+        }
+
+        //Native display transformation if available
+        if (type == "error") {
+            if (!obj.isCustomError)
+                obj = new CustomError().use(obj);
+            obj = obj.toJSON().error;
+        }
+
+        if (obj && _.isFunction(obj.toISOString))
+            obj = obj.toISOString();
+        else if (obj && _.isFunction(obj.toJSON))
+            obj = obj.toJSON();
+
+
+        //Get ready for sub-levels
+        nSpaces++;
+
+        let keysSet = _.keys(obj),
+            kString,
+            currentSpace = genSpace(initSpace, spaceString, nSpaces) + "|", //sub-level
+            pref = "";
+
+        if (!keysSet.length)
+            pref = "empty ";
+        else
+            pref = "size=" + keysSet.length + ",";
+
+        if (type == "error" && _.isString(obj.stack)) {
+            let cSpace = genSpace(initSpace, spaceString, nSpaces),
+                stack = "\n" + _.map(obj.stack.split("\n"), (line)=> {
+                        line = line.trim();
+                        line = cSpace + spaceString + line;
+                        return line;
+                    }).join("\n");
+            obj.stack = stack;
+        }
 
 
         if (type == "function") {
             out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || colorsByType[type] || true);
             return out;
         }
-        else if (type != "error" && type != "object" && type != "array") {
+        else if (type != "error" && type != "object" && type != "array" && type != "plainObject") {
             out += stylize(obj + " [" + type + "]", noColor || colorsByType[type] || true);
             return out;
         }
-        nSpaces++;
 
-        var keysSet = type == "error" ? Object.getOwnPropertyNames(obj) : _.keys(obj);
-        var pref = "";
-        if (nSpaces > 1) {
-            if (!keysSet.length)
-                pref = "empty ";
-            else
-                pref = "size=" + keysSet.length + ",";
-            out += stylize((_.get(obj, "constructor.name") || "") + "[" + pref + type + "]", noColor || colorsByType[type] || true);
-        }
+        out += stylize((_.get(obj, "constructor.name") || "") + "[" + pref + type + "]", noColor || colorsByType[type] || true);
 
-
-        var kString;
         keysSet.forEach(function (k) {
-            out += "\n";
+            out += N(1);
             type = customTypeOf(obj[k]);
             kString = stylize(k, noColor || colorsByType[type] || true);
-            out += currentSpaces + kString + " : " + objectFormatter.call({seenObjects: _.clone(seenObjects)}, obj[k], spaceString, nSpaces, noColor, k);
-        })
+            out += currentSpace + kString + " : ";
+            out += objectFormatter.call({recursive: true, seenObjects: _.clone(seenObjects)}, {
+                obj: obj[k],
+                initSpace: initSpace,
+                spaceString: spaceString,
+                nSpaces: nSpaces,
+                noColor: noColor,
+                prevKey: k
+            });
+
+        });
+
+
         return out;
     };
 
@@ -211,16 +255,6 @@ module.exports = function beautiful(opts) {
 
     return function (args, level) {
         args = _.clone(args);
-
-
-        //    namespace: true,
-        //    context: true,
-        //    idContext : true,
-        //    level: true,
-        //    pid: true,
-        //    date: true,
-        //    inBetweenDuration: true
-
         var line = "", formattedContext;
         if (opts.environment)
             line += stylize("[" + this.config.environment + "]", "bold");
@@ -242,7 +276,12 @@ module.exports = function beautiful(opts) {
             formattedContext = _.isFunction(opts.context) ? opts.context(this.config.context.contents) : this.config.context.contents;
             if (_.isPlainObject(formattedContext)) {
                 line += N(1);
-                formattedContext = objectFormatter(formattedContext, " ", 2, true);
+                formattedContext = objectFormatter({
+                    obj: formattedContext,
+                    spaceString: " ",
+                    nSpaces: 2,
+                    noColor: true
+                });
             }
             else
                 line += " ";
@@ -272,17 +311,13 @@ module.exports = function beautiful(opts) {
         args = _.map(args);
 
         //Now, discover each distinct argument
-
-        //If 2 args and 2 objects, let's compare
-        //(_.isPlainObject(args[0]) || _.isArray(args[0])) && (_.isPlainObject(args[1]) || _.isArray(args[1]))
-
         if (args.length == 2 && _.isObject(args[0]) && !(args[0] instanceof Error) && _.isObject(args[1]) && !(args[1] instanceof Error)) {
-            var a = objectFormatter(args[0], " ", 3, true).split("\n"),
-                b = objectFormatter(args[1], " ", 3, true).split("\n");
+            var a = objectFormatter({obj: args[0], spaceString: " ", nSpaces: 3, noColor: true}).split("\n"),
+                b = objectFormatter({obj: args[1], spaceString: " ", nSpaces: 3, noColor: true}).split("\n");
             var maxL = _.max([a.length, b.length]),
                 aLongest = _.maxBy(a, "length").length;
             var completeLine = "\n";
-            for (var i = 0; i < maxL; i++) {
+            for (var i = 1; i < maxL; i++) {
                 var al = (_.get(a, i) || "" ), bl = (_.get(b, i) || "" ), separ = "|";
                 if (al == bl) separ = "=";
                 while (al.length < aLongest)
@@ -331,27 +366,29 @@ module.exports = function beautiful(opts) {
                 line += stylize("(" + (code ? code + ":" : "") + codeString + ")", "red");
 
             line += stylize(error.stack, "red");
-            line += objectFormatter({extra: extra}, " ", 2);
+            if (_.keys(extra).length)
+                line += objectFormatter({
+                    obj: extra,
+                    initSpace: "    ",
+                    spaceString: " ",
+                    nSpaces: 2
+                });
             line += N(1);
             return line + N(opts.linesBetweenLogs - 1);
         }
 
         //Otherwise we just display
         for (var i = 0; i < args.length; i++) {
-            if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i])) {
+            if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
                 line += (args[i].toString()) + " ";
-            }
-            else if (_.isFunction(args[i])) {
+            else if (_.isFunction(args[i]))
                 line += '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
-            }
-            else if (_.isObject(args[i])) {
-                line += N(1);
-                line += objectFormatter(args[i], " ", 2) + " ";
-            }
-            else if (_.isUndefined(args[i])) {
+            else if (_.isObject(args[i]))
+                line += objectFormatter({obj: args[i], spaceString: " ", nSpaces: 2}) + " ";
+            else if (_.isNull(args[i]))
+                line += "null";
+            else if (_.isUndefined(args[i]))
                 line += "undefined ";
-            }
-
         }
 
         line += N(opts.linesBetweenLogs);
