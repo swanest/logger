@@ -92,6 +92,8 @@ module.exports = function beautiful(opts) {
             return "null";
         else if (_.isBoolean(inp))
             return "boolean";
+        else if (_.isRegExp(inp))
+            return "regExp";
         else if (inp instanceof Error)
             return "error";
         else if (inp && _.isFunction(inp.getTimestamp) && _.isFunction(inp.toString) && inp.toString().length == 24)
@@ -128,7 +130,8 @@ module.exports = function beautiful(opts) {
             function: "cyan",
             array: "underline",
             object: "bold",
-            plainObject: "bold"
+            plainObject: "bold",
+            regExp: "yellow"
         };
 
         let obj = config.obj,
@@ -380,15 +383,18 @@ module.exports = function beautiful(opts) {
         //Otherwise we just display
         for (var i = 0; i < args.length; i++) {
             if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
-                line += (args[i].toString()) + " ";
+                line += (args[i].toString());
             else if (_.isFunction(args[i]))
                 line += '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
-            else if (_.isObject(args[i]))
-                line += objectFormatter({obj: args[i], spaceString: " ", nSpaces: 2}) + " ";
+            else if (_.isRegExp(args[i]))
+                line += args[i].toString();
             else if (_.isNull(args[i]))
                 line += "null";
             else if (_.isUndefined(args[i]))
-                line += "undefined ";
+                line += "undefined";
+            else if (_.isObject(args[i]))
+                line += objectFormatter({obj: args[i], spaceString: " ", nSpaces: 2});
+            line += " ";
         }
 
         line += N(opts.linesBetweenLogs);
