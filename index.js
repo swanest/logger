@@ -27,6 +27,9 @@ function Logger(config, replace) {
     config.isEnabled = config.namespace != void 0 && process.env.DEBUG != "*" && (process.env.DEBUG || "").match(config.namespace) == void 0 ? false : true;
     config.lastLogged = moment.utc();
     this.config = config;
+
+    this.buffer = [];
+    this.bufferMode = false;
 };
 
 Logger.prototype.enable = function () {
@@ -50,6 +53,10 @@ Logger.prototype.config = function () {
 function sendToStreams(args, level) {
     if (!this.config.isEnabled)
         return this;
+    if (this.bufferMode) {
+        this.buffer.push({method: level.toLowerCase(), args: args});
+        return this;
+    }
     for (var s in this.config.streams) {
         if (this.config.streams[s].levels[level])
             this.config.streams[s].stream.write(this.config.streams[s].formatter.call(this, args, level));
@@ -58,6 +65,21 @@ function sendToStreams(args, level) {
     return this;
 };
 
+
+Logger.prototype.startBuffer = function () {
+    this.bufferMode = true;
+    return this;
+};
+
+Logger.prototype.releaseBuffer = function () {
+    this.bufferMode = false;
+    var _this = this;
+    _.each(_this.buffer, function (op) {
+        return _this[op.method].apply(_this, op.args);
+    });
+    _this.buffer = [];
+    return this;
+};
 
 Logger.prototype.debug = function () {
     return sendToStreams.call(this, arguments, "DEBUG");

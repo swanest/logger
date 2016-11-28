@@ -11,14 +11,14 @@ module.exports = function beautiful(opts) {
 
     _.defaults(opts, {
         //namespaceColor:"black"
-        environment: true,
+        environment: true, //can be a string or a cb(environment)
         linesBetweenLogs: 2,
-        namespace: true,
+        namespace: true, //can be a string or a cb(namespace)
         context: false,
         idContext: true,
-        level: true,
+        level: true, //can be a cb(level)
         pid: true,
-        date: "DD/MM/YY HH:mm UTC",
+        date: "DD/MM/YY HH:mm UTC", //can be a cb(date)
         inBetweenDuration: true
     });
 
@@ -256,23 +256,47 @@ module.exports = function beautiful(opts) {
         "z": "magenta"
     };
 
+
     return function (args, level) {
         args = _.clone(args);
-        var line = "", formattedContext;
-        if (opts.environment)
-            line += stylize("[" + this.config.environment + "]", "bold");
-        if (opts.namespace && _.isString(this.config.namespace))
-            line += stylize("#" + this.config.namespace, "bold", opts.namespaceColor || alphabetColors[this.config.namespace[0]]) + "  ";
+        var line = "", formattedContext, optFormattedVal;
+
+        if (opts.environment) {
+            if (_.isString(opts.environment))
+                optFormattedVal = opts.environment;
+            else if (_.isFunction(opts.environment))
+                optFormattedVal = opts.environment(this.config.environment)
+            else
+                optFormattedVal = "[" + this.config.environment + "]";
+            line += stylize(optFormattedVal, "bold");
+        }
+
+
+        if (opts.namespace && _.isString(this.config.namespace)) {
+            if (_.isString(opts.namespace))
+                optFormattedVal = opts.namespace;
+            else if (_.isFunction(opts.namespace))
+                optFormattedVal = opts.namespace(this.config.namespace)
+            else
+                optFormattedVal = "#" + this.config.namespace;
+            line += stylize(optFormattedVal, opts.namespaceColor || alphabetColors[this.config.namespace[0]]) + "  ";
+        }
+
         if (opts.idContext && _.get(this.config, "context.id"))
             line += stylize(_.get(this.config, "context.id"), "underline") + "  ";
+
         if (opts.level)
-            line += stylize(level, colorFromLevel[level]) + "  ";
+            line += stylize(_.isFunction(opts.level) ? opts.level(level) : level, colorFromLevel[level]) + "  ";
+
         if (opts.pid)
             line += stylize(process.pid, colorFromLevel[level]) + "  ";
+
         if (opts.date)
-            line += stylize(moment.utc().format(opts.date), colorFromLevel[level]) + "  ";
+            line += stylize(_.isFunction(opts.date) ? opts.date() : moment.utc().format(opts.date), colorFromLevel[level]) + "  ";
+
         if (opts.inBetweenDuration)
             line += stylize("+" + moment.utc().diff(this.config.lastLogged, "ms") + "ms", colorFromLevel[level]) + "  ";
+
         if (opts.context && _.get(this.config, "context.contents")) {
             line += "\n";
             line += stylize("context:", "black");
