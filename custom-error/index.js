@@ -51,7 +51,7 @@ CustomError.prototype.use = function use(e) {
     if (err && (err instanceof Error || e.error != void 0 || e.isCustomError)) {
         err.message && (this.message = err.message);
         err.stack && (this.stack = err.stack);
-        err.codeString = (this.codeString = err.codeString);
+        err.codeString && (this.codeString = err.codeString);
         err.code && (this.code = err.code);
         err.level = (this.level = err.level);
         if (err.info) {

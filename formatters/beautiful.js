@@ -4,7 +4,7 @@ var _ = require("lodash"),
     CustomError = require("../custom-error");
 
 
-module.exports = function beautiful(opts) {
+module.exports = function createFormatter(opts) {
 
     if (opts == void 0)
         opts = {};
@@ -14,13 +14,18 @@ module.exports = function beautiful(opts) {
         environment: true, //can be a string or a cb(environment)
         linesBetweenLogs: 2,
         namespace: true, //can be a string or a cb(namespace)
-        context: false,
+        contentsContext: false,
         idContext: true,
         level: true, //can be a cb(level)
         pid: true,
         date: "DD/MM/YY HH:mm UTC", //can be a cb(date)
         inBetweenDuration: true
     });
+
+    if(opts.context) { //alias for opts.contentsContext
+        opts.contentsContext = opts.context;
+        delete opts.context;
+    }
 
     var colors = {
             'bold': [1],
@@ -257,7 +262,7 @@ module.exports = function beautiful(opts) {
     };
 
 
-    return function (args, level) {
+    return function beautifulFormatter(args, level) {
         args = _.clone(args);
         var line = "", formattedContext, optFormattedVal;
 
@@ -297,10 +302,10 @@ module.exports = function beautiful(opts) {
         if (opts.inBetweenDuration)
             line += stylize("+" + moment.utc().diff(this.config.lastLogged, "ms") + "ms", colorFromLevel[level]) + "  ";
 
-        if (opts.context && _.get(this.config, "context.contents")) {
+        if (opts.contentsContext && _.get(this.config, "context.contents")) {
             line += "\n";
             line += stylize("context:", "black");
-            formattedContext = _.isFunction(opts.context) ? opts.context(this.config.context.contents) : this.config.context.contents;
+            formattedContext = _.isFunction(opts.contentsContext) ? opts.contentsContext(this.config.context.contents) : this.config.context.contents;
             if (_.isPlainObject(formattedContext)) {
                 line += N(1);
                 formattedContext = objectFormatter({

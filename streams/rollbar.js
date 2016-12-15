@@ -1,11 +1,11 @@
 var rollbar = require("rollbar");
-module.exports = function (apiKey, environment) {
+module.exports = function createStream(apiKey, environment) {
 
     rollbar.init(apiKey, {
         environment: environment
     });
 
-    return {
+    return { //stream object
         write: function (loggable) {
             if (loggable.error == void 0)
                 rollbar.reportMessageWithPayloadData(loggable.message, {

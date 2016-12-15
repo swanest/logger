@@ -1,11 +1,11 @@
 var _ = require("lodash");
 
-module.exports = function (opts) {
+module.exports = function createFormatter(opts) {
 
     if (opts == void 0)
         opts = {};
 
-    return function (args, level) {
+    return function rollbarFormatter(args, level) {
 
         args = _.clone(args);
         var index = 0, argsIndexesToRemove = [];
