@@ -1,7 +1,7 @@
 module.exports = { //stream object
-    write: function (s) {
+    write: function (o) {
         try {
-            process.stdout.write(s);
+            process[o.streamName].write(o.output);
         } catch (e) {
         }
     }

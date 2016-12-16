@@ -1,5 +1,5 @@
 {
-  "name": "logger",
+  "name": "sw-logger",
   "version": "1.0.0",
   "description": "Complete and simple-to-use logger",
   "main": "index.js",

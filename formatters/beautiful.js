@@ -22,7 +22,7 @@ module.exports = function createFormatter(opts) {
         inBetweenDuration: true
     });
 
-    if(opts.context) { //alias for opts.contentsContext
+    if (opts.context) { //alias for opts.contentsContext
         opts.contentsContext = opts.context;
         delete opts.context;
     }
@@ -192,7 +192,7 @@ module.exports = function createFormatter(opts) {
 
         if (type == "error" && _.isString(obj.stack)) {
             let cSpace = genSpace(initSpace, spaceString, nSpaces),
-                stack = "\n" + _.map(obj.stack.split("\n"), (line)=> {
+                stack = "\n" + _.map(obj.stack.split("\n"), (line) => {
                         line = line.trim();
                         line = cSpace + spaceString + line;
                         return line;
@@ -358,7 +358,12 @@ module.exports = function createFormatter(opts) {
                 completeLine += al;
 
             }
-            return line + completeLine + N(opts.linesBetweenLogs - 1);
+
+            return {
+                streamName: (level == "DEBUG" || level == "INFO") ? "stdout" : "stderr",
+                output: line + completeLine + N(opts.linesBetweenLogs - 1)
+            };
+
         }
 
         var error, extra = {}, message = "", codeString, code, unclassified = [];
@@ -406,7 +411,12 @@ module.exports = function createFormatter(opts) {
                     nSpaces: 2
                 });
             line += N(1);
-            return line + N(opts.linesBetweenLogs - 1);
+
+            return {
+                streamName: (level == "DEBUG" || level == "INFO") ? "stdout" : "stderr",
+                output: line + N(opts.linesBetweenLogs - 1)
+            };
+
         }
 
         //Otherwise we just display
@@ -427,7 +437,12 @@ module.exports = function createFormatter(opts) {
         }
 
         line += N(opts.linesBetweenLogs);
-        return line;
+
+        return {
+            streamName: (level == "DEBUG" || level == "INFO") ? "stdout" : "stderr",
+            output: line
+        };
+
 
     };
 

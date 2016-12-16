@@ -12,7 +12,9 @@ declare namespace Types {
                 }
             }
             namespace Beautiful {
-                interface Format extends String, Common.Format {
+                interface Format extends Common.Format {
+                    streamName: "stdout" | "stderr";
+                    output: string
                 }
                 interface Formatter extends Common.Formatter {
                     (args: any, level: Common.level): Format;
@@ -93,15 +95,15 @@ declare namespace Types {
      CustomError declarations
      */
     namespace CustomError {
-        interface CustomErrorPlainObject{
-            error:{
-                message:string;
-                level:"fatal"|"warning"|"notice";
-                stack?:string;
-                codeString:string;
-                code:number;
-                info?:Object;
-                isCustomError:true
+        interface CustomErrorPlainObject {
+            error: {
+                message: string;
+                level: "fatal"|"warning"|"notice";
+                stack?: string;
+                codeString: string;
+                code: number;
+                info?: Object;
+                isCustomError: true
             }
         }
     }
@@ -164,7 +166,10 @@ export var streams: {
 export declare class CustomError extends Error {
     constructor(codeString?: string, message?: string, ...more: Array<any>);
     constructor(codeString?: string, message?: string, code?: number, level?: "fatal"|"warning"|"notice", ...more: Array<any>);
-    toObject(filter?:((err:this)=>Types.CustomError.CustomErrorPlainObject)):Types.CustomError.CustomErrorPlainObject
-    toJSON(filter?:((err:this)=>Types.CustomError.CustomErrorPlainObject)):Types.CustomError.CustomErrorPlainObject
-    use(e:Error | Types.CustomError.CustomErrorPlainObject):this
+
+    toObject(filter?: ((err: this)=>Types.CustomError.CustomErrorPlainObject)): Types.CustomError.CustomErrorPlainObject
+
+    toJSON(filter?: ((err: this)=>Types.CustomError.CustomErrorPlainObject)): Types.CustomError.CustomErrorPlainObject
+
+    use(e: Error | Types.CustomError.CustomErrorPlainObject): this
 }

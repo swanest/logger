@@ -49,5 +49,6 @@ tracer.addStream("rollbar", {
     }
 });
 
+tracer.log("hello year %y", moment().format("YYYY"));
 tracer.warn("hello year %y", moment().format("YYYY"));
-tracer.err(new CustomError("errorTest", "this is an error message", {info:"abc"}));
+tracer.error(new CustomError("errorTest", "this is an error message", {info:"abc"}));
