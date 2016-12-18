@@ -1,126 +1,120 @@
-declare namespace Types {
-    /*
-     Logger declarations
-     */
-    namespace Logger {
-        namespace Formatters {
-            namespace Common {
-                type level = "FATAL" | "ERROR" | "WARNING" | "INFO" | "DEBUG";
-                interface Format {
-                }
-                interface Formatter {
-                }
+/*
+ Logger & CustomError Declarations
+ */
+declare namespace D {
+    namespace Formatters {
+        namespace Common {
+            type level = "FATAL" | "ERROR" | "WARNING" | "INFO" | "DEBUG";
+            interface Format {
             }
-            namespace Beautiful {
-                interface Format extends Common.Format {
-                    streamName: "stdout" | "stderr";
-                    output: string
-                }
-                interface Formatter extends Common.Formatter {
-                    (args: any, level: Common.level): Format;
-                }
-                interface Options {
-                    namespace: boolean | string | ((namespace: string)=>string);
-                    namespaceColor?: "black" | "blue" | "cyan" | "green" | "magenta" | "white" | "red" | "yellow" | "inverse" | "underline" | "italic" | "bold";
-                    linesBetweenLogs: number;
-                    environment: boolean | string | ((environment: string)=>string);
-                    contentsContext: boolean | ((contextContents: Object)=>(Object | string));
-                    idContext: boolean;
-                    level: boolean | ((level: string)=>string);
-                    pid: boolean;
-                    date: boolean | string | (()=>string);
-                    inBetweenDuration: boolean;
-                }
-                interface Generator {
-                    (opts?: Options): Formatter;
-                }
-            }
-            namespace Rollbar {
-                interface Format extends Common.Format {
-                    error?: Error | null | undefined;
-                    level: "critical" | "error" | "warning" | "info" | "debug";
-                    custom: Object,
-                    message: string
-                }
-                interface Formatter extends Common.Formatter {
-                    (args: any, level: Common.level): Format;
-                }
-                interface Generator {
-                    (): Formatter;
-                }
+            interface Formatter {
             }
         }
-        namespace Streams {
-            interface Stream {
-                write(data: Formatters.Common.Format): void;
+        namespace Beautiful {
+            interface Format extends Common.Format {
+                streamName: "stdout" | "stderr";
+                output: string
             }
-            namespace Rollbar {
-                interface Generator {
-                    (apiKey: string, environment: string): Stream;
-                }
+            interface Formatter extends Common.Formatter {
+                (args: any, level: Common.level): Format;
+            }
+            interface Options {
+                namespace: boolean | string | ((namespace: string)=>string);
+                namespaceColor?: "black" | "blue" | "cyan" | "green" | "magenta" | "white" | "red" | "yellow" | "inverse" | "underline" | "italic" | "bold";
+                linesBetweenLogs: number;
+                environment: boolean | string | ((environment: string)=>string);
+                contentsContext: boolean | ((contextContents: Object)=>(Object | string));
+                idContext: boolean;
+                level: boolean | ((level: string)=>string);
+                pid: boolean;
+                date: boolean | string | (()=>string);
+                inBetweenDuration: boolean;
+            }
+            interface Generator {
+                (opts?: Options): Formatter;
             }
         }
-        namespace Config {
-            interface StreamConfig {
-                formatter?: Formatters.Common.Formatter
-                stream?: Streams.Stream;
-                levels?: {
-                    DEBUG: boolean;
-                    INFO: boolean;
-                    WARNING: boolean;
-                    ERROR: boolean;
-                    FATAL: boolean;
-                };
+        namespace Rollbar {
+            interface Format extends Common.Format {
+                error?: Error | null | undefined;
+                level: "critical" | "error" | "warning" | "info" | "debug";
+                custom: Object,
+                message: string
             }
-            interface stdOutStreamConfig extends StreamConfig {
-                formatter: Formatters.Beautiful.Formatter;
+            interface Formatter extends Common.Formatter {
+                (args: any, level: Common.level): Format;
             }
-            interface rollbarStreamConfig extends StreamConfig {
-                formatter: Formatters.Rollbar.Formatter
-            }
-            interface Setup {
-                namespace: string;
-                environment?: string;
-                context?: {id?: string; contents: Object};
-                streams?: {
-                    stdOut?: stdOutStreamConfig;
-                    rollbar?: rollbarStreamConfig;
-                };
+            interface Generator {
+                (): Formatter;
             }
         }
     }
-
-
-    /*
-     CustomError declarations
-     */
-    namespace CustomError {
-        interface CustomErrorPlainObject {
-            error: {
-                message: string;
-                level: "fatal"|"warning"|"notice";
-                stack?: string;
-                codeString: string;
-                code: number;
-                info?: Object;
-                isCustomError: true
+    namespace Streams {
+        interface Stream {
+            write(data: Formatters.Common.Format): void;
+        }
+        namespace Rollbar {
+            interface Generator {
+                (apiKey: string, environment: string): Stream;
             }
         }
     }
+    namespace Config {
+        interface StreamConfig {
+            formatter?: Formatters.Common.Formatter
+            stream?: Streams.Stream;
+            levels?: {
+                DEBUG: boolean;
+                INFO: boolean;
+                WARNING: boolean;
+                ERROR: boolean;
+                FATAL: boolean;
+            };
+        }
+        interface stdOutStreamConfig extends StreamConfig {
+            formatter: Formatters.Beautiful.Formatter;
+        }
+        interface rollbarStreamConfig extends StreamConfig {
+            formatter: Formatters.Rollbar.Formatter
+        }
+        interface Setup {
+            namespace: string;
+            environment?: string;
+            context?: {id?: string; contents: Object};
+            streams?: {
+                stdOut?: stdOutStreamConfig;
+                rollbar?: rollbarStreamConfig;
+            };
+        }
+    }
 
+    /*
+     CustomError PlainObject scheme
+     */
+    interface CustomErrorPlainObject {
+        error: {
+            message: string;
+            level: "fatal"|"warning"|"notice";
+            stack?: string;
+            codeString: string;
+            code: number;
+            info?: Object;
+            isCustomError: true
+        }
+    }
 
 }
 
 
 //Logger exports
 export declare class Logger {
-    constructor(config?: Types.Logger.Config.Setup);
+    constructor(config?: D.Config.Setup);
 
     enable(): this
 
     disable(): this
 
-    config(config?: Types.Logger.Config.Setup): this
+    config(config?: D.Config.Setup): this
 
     startBuffer(): this
 
@@ -142,34 +136,44 @@ export declare class Logger {
 
     fatal(...args: Array<any>): this
 
-    copy(overloadConfig?: Types.Logger.Config.Setup): Logger
+    copy(overloadConfig?: D.Config.Setup): Logger
 
     context(id: string): Logger
     context(contents: Object, id: string): Logger
 
-    addStream(label: string, streamConfig: Types.Logger.Config.StreamConfig): this
+    addStream(label: string, streamConfig: D.Config.StreamConfig): this
 
     removeStream(...labels: Array<string>): this
 }
 
 export var formatters: {
-    beautiful: Types.Logger.Formatters.Beautiful.Generator,
-    rollbar: Types.Logger.Formatters.Rollbar.Generator
+    readonly beautiful: D.Formatters.Beautiful.Generator,
+    readonly rollbar: D.Formatters.Rollbar.Generator
 };
 
 export var streams: {
-    stdout: Types.Logger.Streams.Stream
-    rollbar: Types.Logger.Streams.Rollbar.Generator
+    readonly stdout: D.Streams.Stream
+    readonly rollbar: D.Streams.Rollbar.Generator
 };
 
 //CustomError exports
 export declare class CustomError extends Error {
+
+    name: 'Error';
+    isCustomError: true;
+    stack: string;
+    level: "notice" | "warning" | "fatal"; //notice,warning,fatal
+    codeString: "string";
+    code: number;
+    message: string; //a human-readable message
+    info: Object;
+
     constructor(codeString?: string, message?: string, ...more: Array<any>);
     constructor(codeString?: string, message?: string, code?: number, level?: "fatal"|"warning"|"notice", ...more: Array<any>);
 
-    toObject(filter?: ((err: this)=>Types.CustomError.CustomErrorPlainObject)): Types.CustomError.CustomErrorPlainObject
+    toObject(filter?: ((err: this)=>D.CustomErrorPlainObject)): D.CustomErrorPlainObject
 
-    toJSON(filter?: ((err: this)=>Types.CustomError.CustomErrorPlainObject)): Types.CustomError.CustomErrorPlainObject
+    toJSON(filter?: ((err: this)=>D.CustomErrorPlainObject)): D.CustomErrorPlainObject
 
-    use(e: Error | Types.CustomError.CustomErrorPlainObject): this
+    use(e: Error | D.CustomErrorPlainObject): this
 }
