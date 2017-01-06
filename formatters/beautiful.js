@@ -46,7 +46,8 @@ module.exports = function createFormatter(opts) {
             INFO: 'cyan',
             WARNING: 'yellow',
             ERROR: 'red',
-            FATAL: 'inverse'
+            FATAL: 'inverse',
+            PROGRESS: "green"
         };
 
     //Empty-line creator
@@ -262,6 +263,7 @@ module.exports = function createFormatter(opts) {
     };
 
 
+    let progression = null;
     return function beautifulFormatter(args, level) {
         args = _.clone(args);
         var line = "", formattedContext, optFormattedVal;
@@ -307,7 +309,6 @@ module.exports = function createFormatter(opts) {
             line += stylize("context:", "black");
             formattedContext = _.isFunction(opts.contentsContext) ? opts.contentsContext(this.config.context.contents) : this.config.context.contents;
             if (_.isPlainObject(formattedContext)) {
-                line += N(1);
                 formattedContext = objectFormatter({
                     obj: formattedContext,
                     spaceString: " ",
@@ -317,9 +318,32 @@ module.exports = function createFormatter(opts) {
             }
             else
                 line += " ";
-            line += formattedContext + N(1);
+            line += stylize(formattedContext,"black") + N(1);
         }
 
+
+        if (level == "PROGRESS") {
+            let clear = true;
+            if (!progression) {
+                progression = {p: 0, t: moment.utc().unix()};
+            }
+            if (_.isFinite(args[0]) && args[0] == 0) {
+                line += stylize(`...%`, colorFromLevel[level]);
+            }
+            else if (_.isFinite(args[0]) && args[0] > 0) {
+                progression.p = args[0];
+                let timeSpent = moment.utc().unix() - progression.t,
+                    timeExpected = Math.round(1 / (progression.p / timeSpent));
+                line += stylize(`${(args[0] * 100).toFixed(2)}% - ${timeSpent}s/${timeExpected}s`, colorFromLevel[level]);
+            }
+            else //done
+                line = N(opts.linesBetweenLogs), clear = false, progression = null;
+            return {
+                streamName: "stdout",
+                output: line,
+                clear: clear
+            };
+        }
 
         //Format args
         var index = 0, argsIndexesToRemove = [];

@@ -8,9 +8,12 @@ module.exports = { //stream object
         try {
             //console.log(o);
             //process[o.streamName].write(o.output);
+            if (o.clear) {
+                process.stdout.cursorTo(0);
+                process.stdout.clearLine(1);
+            }
             process.stdout.write(o.output);
         } catch (e) {
         }
     }
-
 };

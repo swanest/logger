@@ -1,6 +1,5 @@
 var logLib = require("../index"),
-    env = process.env.NODE_ENV || "development",
-    mongoose = require("mongoose");
+    env = process.env.NODE_ENV || "development";
 
 var tracerA = new logLib.Logger({
     namespace: "myApp", //define a namespace if you want to be able to activate, deactivate the logging module by passing DEBUG=name as environment variable
@@ -31,35 +30,28 @@ var tracerA = new logLib.Logger({
     }
 });
 
-if (GLOBAL.CustomError == void 0)
-    GLOBAL.CustomError = logLib.CustomError;
+if (global.CustomError == void 0)
+    global.CustomError = logLib.CustomError;
 
+
+tracerA.log("Test Progression...");
+
+var i = 0;
+tracerA.progress(i);
+setInterval(function () {
+        i += 0.1;
+        tracerA.progress(i);
+    },
+    300)
 
 var newError = new CustomError("codeString", "my message", "next hello", 404, {info: "hello"}, {otherInfo: 3}, "warning");
 
 tracerA.error(newError);
-
-
 tracerA.log({arr: [{bebe: 1}, {hdhd: 3}]}, "cool");
-
-tracerA.log({
-    mongoose: {
-        _id: mongoose.Types.ObjectId('4edd40c86762e0fb12000003'),
-        id: mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toString(),
-        idS: mongoose.Types.ObjectId('4edd40c86762e0fb12000003').toJSON(),
-        lala: "ok",
-        func: function blabla() {
-        }
-
-    }
-});
-
-
 tracerA
     .debug('A %s without any %s. Finally:%o', "string", "context", {toBe: "orNotToBe"})
     .info({print: "lala"})
     .fatal("next error", new Error("a fatal error occured"));
-
 
 //Add now a context. Imagine an in-request coming
 var request = {
@@ -69,12 +61,12 @@ var request = {
         where: "At Albertine's"
     }
 };
-
-
 var tracerB = tracerA.context(request, function (req) {
     return req.client + " " + req.task;
 });
-//or tracerB = tracerA.context(request, "a string");
+
+
+//or tracerB = tracerA.context(request, "a string"); or tracerA.context("idContext")
 
 //For now, stdOut stream  displays only idContext, we want to show the object extraInfo from request
 //Furthermore, we want this modification to be effective only on tracerB, leaving the stdout's formatter of tracerA unchanged to be able to change the structure of the context object
@@ -121,12 +113,11 @@ var circular = {
 };
 
 circular.key.circ = circular;
-
 tracerA.debug(circular);
 tracerA.log("hello %o", circular);
 
 //Compare two objects
-tracerB.debug([1, 2, 3], [4, 5, 6, {complex: true}]);
+tracerB.debug([1, 2, 3], [1, 2, 3, {complex: true}]);
 
 var e = new Error("test");
 e.codeString = "missingArgument";
@@ -140,12 +131,11 @@ tracerB.fatal(
     e //finally the error that includes info
 );
 
-tracerB.removeStream("stdOut", "rollbar");
-tracerB.log("won't be shown");
-
 tracerA.log("will be shown");
 
-
 setTimeout(function () {
+    tracerA.log("TracerB wont log anything anymore...");
+    tracerB.removeStream("stdOut", "rollbar");
+    tracerB.log("won't be shown");
 }, 5000);
 

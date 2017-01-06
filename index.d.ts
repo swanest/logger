@@ -44,8 +44,11 @@ declare namespace D {
             interface Formatter extends Common.Formatter {
                 (args: any, level: Common.level): Format;
             }
+            interface Options {
+                context: boolean | ((contextContents: Object)=>any);
+            }
             interface Generator {
-                (): Formatter;
+                (opts?: Options): Formatter;
             }
         }
     }
@@ -106,19 +109,25 @@ declare namespace D {
 }
 
 
+
 //Logger exports
 export declare class Logger {
+
+    public config: D.Config.Setup;
+    public buffer: Array<any>;
+    public bufferMode: boolean;
+    public children: Array<Logger>;
+    public parent: void | Logger;
+
     constructor(config?: D.Config.Setup);
 
-    enable(): this
+    enable(recursive?:boolean): this
 
-    disable(): this
+    disable(recursive?:boolean): this
 
-    config(config?: D.Config.Setup): this
+    startBuffer(recursive?:boolean): this
 
-    startBuffer(): this
-
-    releaseBuffer(): this
+    releaseBuffer(recursive?:boolean): this
 
     debug(...args: Array<any>): this
 
@@ -136,10 +145,14 @@ export declare class Logger {
 
     fatal(...args: Array<any>): this
 
+    progress(decimal?: number): this
+
     copy(overloadConfig?: D.Config.Setup): Logger
 
-    context(id: string): Logger
-    context(contents: Object, id: string): Logger
+    context(id?: string): Logger
+    context(contents?: Object, id?: string): Logger
+    unlink(): this
+
 
     addStream(label: string, streamConfig: D.Config.StreamConfig): this
 
@@ -169,7 +182,7 @@ export declare class CustomError extends Error {
     info: Object;
 
     constructor(codeString?: string, message?: string, ...more: Array<any>);
-    constructor(codeString?: string, message?: string, code?: number, level?: "fatal"|"warning"|"notice", ...more: Array<any>);
+    constructor(code?: number, codeString?: string, level?: "fatal"|"warning"|"notice");
 
     toObject(filter?: ((err: this)=>D.CustomErrorPlainObject)): D.CustomErrorPlainObject
 
