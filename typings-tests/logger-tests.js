@@ -1,7 +1,7 @@
 "use strict";
-var logger = require("../index");
-var moment = require("moment");
-var stdOutStream = {
+const logger = require("../index");
+const moment = require("moment");
+let stdOutStream = {
     stream: logger.streams.stdout,
     formatter: logger.formatters.beautiful({
         namespace: "l",
@@ -27,7 +27,7 @@ var stdOutStream = {
         FATAL: true
     }
 };
-var tracer = new logger.Logger({
+let tracer = new logger.Logger({
     namespace: "logger",
     environment: "TEST",
     streams: {
@@ -46,8 +46,8 @@ tracer.addStream("rollbar", {
         FATAL: true
     }
 });
-var error = new logger.CustomError("errorTest", "this is an error message", { info: "abc" });
-var errObject = error.toObject();
+let error = new logger.CustomError("errorTest", "this is an error message", { info: "abc" });
+let errObject = error.toObject();
 tracer.log(errObject);
 // tracer.log("hello year %y", moment().format("YYYY"));
 // tracer.warn("hello year %y", moment().format("YYYY"));

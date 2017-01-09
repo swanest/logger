@@ -34,6 +34,11 @@ if (global.CustomError == void 0)
     global.CustomError = logLib.CustomError;
 
 
+let map = new Map();
+map.set("lala", new CustomError("test", {inner:{inner:2}}));
+map.set("ok", {ok: 1});
+tracerA.log("Test map", map);
+
 tracerA.log("Test Progression...");
 
 var i = 0;
@@ -132,6 +137,7 @@ tracerB.fatal(
 );
 
 tracerA.log("will be shown");
+
 
 setTimeout(function () {
     tracerA.log("TracerB wont log anything anymore...");

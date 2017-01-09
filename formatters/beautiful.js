@@ -119,7 +119,6 @@ module.exports = function createFormatter(opts) {
         return sp;
     };
 
-
     function objectFormatter(config) {
 
         var colorsByType = {
@@ -165,23 +164,38 @@ module.exports = function createFormatter(opts) {
             seenObjects.push({object: obj, key: prevKey})
         }
 
-        //Native display transformation if available
-        if (type == "error") {
-            if (!obj.isCustomError)
-                obj = new CustomError().use(obj);
-            obj = obj.toJSON().error;
-        }
-
-        if (obj && _.isFunction(obj.toISOString))
-            obj = obj.toISOString();
-        else if (obj && _.isFunction(obj.toJSON))
-            obj = obj.toJSON();
-
-
         //Get ready for sub-levels
         nSpaces++;
 
-        let keysSet = _.keys(obj),
+        let formatted = obj;
+
+        //Native display transformation if available
+        if (obj instanceof Map || obj instanceof Set) { //If Map or Set, translate it to a plainObject
+            formatted = {};
+            for (let [key, value] of obj.entries()) {
+                formatted[key] = value;
+            }
+        }
+        else if (type == "error") {
+            if (!obj.isCustomError)
+                obj = new CustomError().use(obj);
+            formatted = obj.toJSON().error;
+            if (_.isString(formatted.stack)) {
+                let cSpace = genSpace(initSpace, spaceString, nSpaces),
+                    stack = "\n" + _.map(formatted.stack.split("\n"), (line) => {
+                            line = line.trim();
+                            line = cSpace + spaceString + line;
+                            return line;
+                        }).join("\n");
+                formatted.stack = stack;
+            }
+        }
+        else if (obj && _.isFunction(obj.toISOString))
+            formatted = obj.toISOString();
+        else if (obj && _.isFunction(obj.toJSON))
+            formatted = obj.toJSON();
+
+        let keysSet = _.keys(formatted),
             kString,
             currentSpace = genSpace(initSpace, spaceString, nSpaces) + "|", //sub-level
             pref = "";
@@ -191,23 +205,12 @@ module.exports = function createFormatter(opts) {
         else
             pref = "size=" + keysSet.length + ",";
 
-        if (type == "error" && _.isString(obj.stack)) {
-            let cSpace = genSpace(initSpace, spaceString, nSpaces),
-                stack = "\n" + _.map(obj.stack.split("\n"), (line) => {
-                        line = line.trim();
-                        line = cSpace + spaceString + line;
-                        return line;
-                    }).join("\n");
-            obj.stack = stack;
-        }
-
-
         if (type == "function") {
             out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || colorsByType[type] || true);
             return out;
         }
         else if (type != "error" && type != "object" && type != "array" && type != "plainObject") {
-            out += stylize(obj + " [" + type + "]", noColor || colorsByType[type] || true);
+            out += stylize(formatted + " [" + type + "]", noColor || colorsByType[type] || true);
             return out;
         }
 
@@ -219,7 +222,7 @@ module.exports = function createFormatter(opts) {
             kString = stylize(k, noColor || colorsByType[type] || true);
             out += currentSpace + kString + " : ";
             out += objectFormatter.call({recursive: true, seenObjects: _.clone(seenObjects)}, {
-                obj: obj[k],
+                obj: formatted[k],
                 initSpace: initSpace,
                 spaceString: spaceString,
                 nSpaces: nSpaces,
@@ -318,7 +321,7 @@ module.exports = function createFormatter(opts) {
             }
             else
                 line += " ";
-            line += stylize(formattedContext,"black") + N(1);
+            line += stylize(formattedContext, "black") + N(1);
         }
 
 
