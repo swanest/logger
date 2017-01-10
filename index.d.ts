@@ -72,6 +72,7 @@ declare namespace D {
                 WARNING: boolean;
                 ERROR: boolean;
                 FATAL: boolean;
+                PROGRESS: boolean;
             };
         }
         interface stdOutStreamConfig extends StreamConfig {
@@ -109,7 +110,6 @@ declare namespace D {
 }
 
 
-
 //Logger exports
 export declare class Logger {
 
@@ -121,13 +121,13 @@ export declare class Logger {
 
     constructor(config?: D.Config.Setup);
 
-    enable(recursive?:boolean): this
+    enable(recursive?: boolean): this
 
-    disable(recursive?:boolean): this
+    disable(recursive?: boolean): this
 
-    startBuffer(recursive?:boolean): this
+    startBuffer(recursive?: boolean): this
 
-    releaseBuffer(recursive?:boolean): this
+    releaseBuffer(recursive?: boolean): this
 
     debug(...args: Array<any>): this
 
@@ -151,6 +151,7 @@ export declare class Logger {
 
     context(id?: string): Logger
     context(contents?: Object, id?: string): Logger
+
     unlink(): this
 
 
