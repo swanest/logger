@@ -19,16 +19,17 @@ declare namespace D {
                 (args: any, level: Common.level): Format;
             }
             interface Options {
-                namespace: boolean | string | ((namespace: string)=>string);
+                namespace?: boolean | string | ((namespace: string)=>string);
                 namespaceColor?: "black" | "blue" | "cyan" | "green" | "magenta" | "white" | "red" | "yellow" | "inverse" | "underline" | "italic" | "bold";
-                linesBetweenLogs: number;
-                environment: boolean | string | ((environment: string)=>string);
-                contentsContext: boolean | ((contextContents: Object)=>(Object | string));
-                idContext: boolean;
+                linesBetweenLogs?: number;
+                environment?: boolean | string | ((environment: string)=>string);
+                contentsContext?: boolean | ((contextContents: Object)=>(Object | string));
+                idContext?: boolean;
                 level: boolean | ((level: string)=>string);
                 pid: boolean;
                 date: boolean | string | (()=>string);
-                inBetweenDuration: boolean;
+                inBetweenDuration?: boolean;
+                displayLineNumber?: boolean;
             }
             interface Generator {
                 (opts?: Options): Formatter;

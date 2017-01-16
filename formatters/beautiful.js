@@ -19,7 +19,8 @@ module.exports = function createFormatter(opts) {
         level: true, //can be a cb(level)
         pid: true,
         date: "DD/MM/YY HH:mm UTC", //can be a cb(date)
-        inBetweenDuration: true
+        inBetweenDuration: true,
+        displayLineNumber: true
     });
 
     if (opts.context) { //alias for opts.contentsContext
@@ -300,6 +301,12 @@ module.exports = function createFormatter(opts) {
 
         if (opts.pid)
             line += stylize(process.pid, colorFromLevel[level]) + "  ";
+
+        if (opts.displayLineNumber) {
+            let logLineDetails = ((new Error().stack).split("at ")[4]).trim().replace(')', '');
+            let b = logLineDetails.split('\\').pop().split('/').slice(-2).join('/');
+            line += stylize(b, colorFromLevel[level]) + "  ";
+        }
 
         if (opts.date)
             line += stylize(_.isFunction(opts.date) ? opts.date() : moment.utc().format(opts.date), colorFromLevel[level]) + "  ";
