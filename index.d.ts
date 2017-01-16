@@ -180,7 +180,7 @@ export declare class CustomError extends Error {
     codeString: "string";
     code: number;
     message: string; //a human-readable message
-    info: Object;
+    info: any;
 
     constructor(codeString?: string, message?: string, ...more: Array<any>);
     constructor(code?: number, codeString?: string, level?: "fatal"|"warning"|"notice");
