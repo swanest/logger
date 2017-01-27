@@ -29,7 +29,7 @@ declare namespace D {
                 pid: boolean;
                 date: boolean | string | (()=>string);
                 inBetweenDuration?: boolean;
-                displayLineNumber?: boolean;
+                displayLineNumber?: boolean | {rootDirName: string};
             }
             interface Generator {
                 (opts?: Options): Formatter;

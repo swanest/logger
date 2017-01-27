@@ -268,7 +268,7 @@ module.exports = function createFormatter(opts) {
 
 
     let progression = null;
-    return function beautifulFormatter(args, level) {
+    return function beautifulFormatter(args, level, extra) {
         args = _.clone(args);
         var line = "", formattedContext, optFormattedVal;
 
@@ -303,8 +303,25 @@ module.exports = function createFormatter(opts) {
             line += stylize(process.pid, colorFromLevel[level]) + "  ";
 
         if (opts.displayLineNumber) {
-            let logLineDetails = ((new Error().stack).split("at ")[4]).trim().replace(')', '');
-            let b = logLineDetails.split('\\').pop().split('/').slice(-2).join('/');
+
+            let stack, lineStack;
+            if(extra && extra.stack)
+                stack = extra.stack, lineStack = 3;
+            else
+                stack = new Error().stack, lineStack = 4;
+
+            let logLineDetails = stack.split("at ")[lineStack].trim().replace(')', '');
+            let b = logLineDetails.split('\\').pop().split('/');
+            if (_.isString(_.get(opts.displayLineNumber, 'rootDirName'))) {
+                let i = b.length - 1;
+                while (b[i] != opts.displayLineNumber.rootDirName && i > 0) {
+                    i--;
+                }
+                b = b.slice(-(b.length - 1 - i)).join('/');
+            }
+            else
+                b = b.slice(-2).join('/');
+
             line += stylize(b, colorFromLevel[level]) + "  ";
         }
 

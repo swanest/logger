@@ -51,16 +51,16 @@ Logger.prototype.disable = function (recursive) {
     return this;
 };
 
-function sendToStreams(args, level) {
+function sendToStreams(args, level, extra) {
     if (!this.config.isEnabled)
         return this;
     if (this.bufferMode && level != "PROGRESS") {
-        this.buffer.push({method: level.toLowerCase(), args: args});
+        this.buffer.push({args: args, level: level, extra: _.extend(extra, {stack: new Error().stack})});
         return this;
     }
     for (var s in this.config.streams) {
         if (this.config.streams[s] && this.config.streams[s].levels[level])
-            this.config.streams[s].stream.write(this.config.streams[s].formatter.call(this, args, level));
+            this.config.streams[s].stream.write(this.config.streams[s].formatter.call(this, args, level, extra));
     }
     this.config.lastLogged = moment.utc();
     return this;
@@ -84,7 +84,7 @@ Logger.prototype.releaseBuffer = function (recursive) {
         });
     var _this = this;
     _.each(_this.buffer, function (op) {
-        return _this[op.method].apply(_this, op.args);
+        return sendToStreams.call(_this, op.args, op.level, op.extra);
     });
     _this.buffer = [];
     return this;

@@ -17,7 +17,8 @@ var tracerA = new logLib.Logger({
                 level: true,
                 pid: true,
                 date: "DD/MM/YY HH:mm UTC",
-                inBetweenDuration: true
+                inBetweenDuration: true,
+                displayLineNumber: {rootDirName: 'rockfox-lib'}
             }),
             levels: {
                 DEBUG: env == "development",
@@ -35,7 +36,7 @@ if (global.CustomError == void 0)
 
 
 let map = new Map();
-map.set("lala", new CustomError("test", {inner:{inner:2}}));
+map.set("lala", new CustomError("test", {inner: {inner: 2}}));
 map.set("ok", {ok: 1});
 tracerA.log("Test map", map);
 
