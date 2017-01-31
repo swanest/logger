@@ -40,6 +40,22 @@ map.set("lala", new CustomError("test", {inner: {inner: 2}}));
 map.set("ok", {ok: 1});
 tracerA.log("Test map", map);
 
+
+let message = {
+    body: [{test: 'ok'}]
+};
+
+message.circula = {
+    test: {
+        blabla: {}
+    }
+};
+
+message.circula.test.blabla = message.circula.test;
+
+message.body[0].message = message;
+tracerA.log(message);
+
 tracerA.log("Test Progression...");
 
 var i = 0;

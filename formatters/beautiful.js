@@ -145,7 +145,8 @@ module.exports = function createFormatter(opts) {
             spaceString = config.spaceString || " ",
             nSpaces = config.nSpaces || 1, //indentation space
             noColor = config.noColor,
-            prevKey = config.prevKey,
+            prevKey = config.prevKey || '',
+            path = config.path || '·',
             seenObjects = this.seenObjects || [],
             found,
             type = customTypeOf(obj),
@@ -160,9 +161,9 @@ module.exports = function createFormatter(opts) {
                 return it.object == obj;
             });
             if (found !== void 0) {
-                return "(Circular 'key:" + found.key + "' " + (_.get(obj, "constructor.name") || "") + ")";
+                return "(ref. to '" + found.path + "' " + (_.get(obj, "constructor.name") || "") + ")";
             }
-            seenObjects.push({object: obj, key: prevKey})
+            seenObjects.push({object: obj, key: prevKey, path: path})
         }
 
         //Get ready for sub-levels
@@ -228,7 +229,8 @@ module.exports = function createFormatter(opts) {
                 spaceString: spaceString,
                 nSpaces: nSpaces,
                 noColor: noColor,
-                prevKey: k
+                prevKey: k,
+                path: path + '.' + k
             });
 
         });
@@ -305,7 +307,7 @@ module.exports = function createFormatter(opts) {
         if (opts.displayLineNumber) {
 
             let stack, lineStack;
-            if(extra && extra.stack)
+            if (extra && extra.stack)
                 stack = extra.stack, lineStack = 3;
             else
                 stack = new Error().stack, lineStack = 4;
