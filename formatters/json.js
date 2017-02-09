@@ -238,7 +238,7 @@ module.exports = function createFormatter(opts) {
         if (level != 'PROGRESS')
             return {
                 streamName: (level == "DEBUG" || level == "INFO") ? "stdout" : "stderr",
-                output: JSON.stringify(_.isFunction(opts.extraFormatter) ? opts.extraFormatter(line) : line, null, 0)
+                output: JSON.stringify(_.isFunction(opts.extraFormatter) ? opts.extraFormatter(line) : line, null, 0) + '\n'
             };
 
         //process.stdout.write()

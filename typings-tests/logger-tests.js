@@ -16,7 +16,8 @@ let stdOutStream = {
             obj.severity = obj.level == 'FATAL' ? 'CRITICAL' : obj.level;
             delete obj.level;
             return obj;
-        }
+        },
+        displayLineNumber:false
     }),
     levels: {
         DEBUG: true,
