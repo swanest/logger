@@ -231,7 +231,7 @@ module.exports = function createFormatter(opts) {
             if (args[i] instanceof Error)
                 line.message = args[i].message;
             else if (_.isString(line.args[i]) && !line.message)
-                line.message = line[i];
+                line.message = line.args[i];
 
         }
 
