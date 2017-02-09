@@ -2,9 +2,10 @@
  Logger & CustomError Declarations
  */
 declare namespace D {
+
     namespace Formatters {
         namespace Common {
-            type level = "FATAL" | "ERROR" | "WARNING" | "INFO" | "DEBUG";
+            type level = "FATAL" | "ERROR" | "WARNING" | "INFO" | "DEBUG" | "PROGRESS";
             interface Format {
             }
             interface Formatter {
@@ -35,6 +36,31 @@ declare namespace D {
                 (opts?: Options): Formatter;
             }
         }
+        namespace Json {
+            interface Format extends Common.Format {
+                streamName: "stdout" | "stderr";
+                output: string
+            }
+            interface Formatter extends Common.Formatter {
+                (args: any, level: Common.level): Format;
+            }
+            interface Options {
+                internalPrefix?: string;
+                namespace?: boolean | string | ((namespace: string)=>string);
+                environment?: boolean | string | ((environment: string)=>string);
+                contentsContext?: boolean | ((contextContents: Object)=>(Object | string));
+                idContext?: boolean;
+                level: boolean | ((level: string)=>string);
+                pid: boolean;
+                inBetweenDuration?: boolean;
+                displayLineNumber?: boolean | {rootDirName: string};
+                extraFormatter?: (obj: Object)=>Object
+            }
+            interface Generator {
+                (opts?: Options): Formatter;
+            }
+        }
+
         namespace Rollbar {
             interface Format extends Common.Format {
                 error?: Error | null | undefined;
@@ -53,6 +79,7 @@ declare namespace D {
             }
         }
     }
+
     namespace Streams {
         interface Stream {
             write(data: Formatters.Common.Format): void;
@@ -63,6 +90,7 @@ declare namespace D {
             }
         }
     }
+
     namespace Config {
         interface StreamConfig {
             formatter?: Formatters.Common.Formatter
@@ -77,7 +105,7 @@ declare namespace D {
             };
         }
         interface stdOutStreamConfig extends StreamConfig {
-            formatter: Formatters.Beautiful.Formatter;
+            formatter: Formatters.Beautiful.Formatter | Formatters.Json.Formatter;
         }
         interface rollbarStreamConfig extends StreamConfig {
             formatter: Formatters.Rollbar.Formatter
@@ -163,6 +191,7 @@ export declare class Logger {
 
 export var formatters: {
     readonly beautiful: D.Formatters.Beautiful.Generator,
+    readonly json: D.Formatters.Json.Generator,
     readonly rollbar: D.Formatters.Rollbar.Generator
 };
 

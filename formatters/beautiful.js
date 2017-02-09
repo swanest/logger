@@ -11,14 +11,14 @@ module.exports = function createFormatter(opts) {
 
     _.defaults(opts, {
         //namespaceColor:"black"
-        environment: true, //can be a string or a cb(environment)
+        environment: true, //can be a boolean, string or a cb(environment)
         linesBetweenLogs: 2,
-        namespace: true, //can be a string or a cb(namespace)
+        namespace: true, //can be a boolean, string or a cb(namespace)
         contentsContext: false,
         idContext: true,
         level: true, //can be a cb(level)
         pid: true,
-        date: "DD/MM/YY HH:mm UTC", //can be a cb(date)
+        date: "DD/MM/YY HH:mm UTC", //can be a boolean, string or a cb(date)
         inBetweenDuration: true,
         displayLineNumber: true
     });
@@ -326,9 +326,16 @@ module.exports = function createFormatter(opts) {
 
             line += stylize(b, colorFromLevel[level]) + "  ";
         }
-
-        if (opts.date)
-            line += stylize(_.isFunction(opts.date) ? opts.date() : moment.utc().format(opts.date), colorFromLevel[level]) + "  ";
+        
+        if (opts.date) {
+            if (_.isString(opts.date))
+                optFormattedVal = moment.utc().format(opts.date);
+            else if (_.isFunction(opts.date))
+                optFormattedVal = opts.date();
+            else
+                optFormattedVal = moment.utc().toISOString();
+            line += stylize(optFormattedVal, colorFromLevel[level]) + "  ";
+        }
 
         if (opts.inBetweenDuration)
             line += stylize("+" + moment.utc().diff(this.config.lastLogged, "ms") + "ms", colorFromLevel[level]) + "  ";

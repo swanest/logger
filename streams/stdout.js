@@ -5,15 +5,17 @@
 
 module.exports = { //stream object
     write: function (o) {
+        if (o == void 0)
+            return;
         try {
-            //console.log(o);
-            //process[o.streamName].write(o.output);
             if (o.clear) {
                 process.stdout.cursorTo(0);
                 process.stdout.clearLine(1);
             }
             process.stdout.write(o.output);
+            //console.log(o.output);
         } catch (e) {
+
         }
     }
 };

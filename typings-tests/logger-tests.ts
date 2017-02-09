@@ -4,35 +4,36 @@ import * as moment from "moment";
 import CustomError = logger.CustomError;
 import CustomErrorPlainObject = logger.D.CustomErrorPlainObject;
 
+
 let stdOutStream: logger.D.Config.stdOutStreamConfig = {
     stream: logger.streams.stdout,
-    formatter: logger.formatters.beautiful({
-        namespace: "l",
-        namespaceColor: "red",
-        linesBetweenLogs: 3,
+    formatter: logger.formatters.json({
+        //date: true,
+        namespace: 'M',
         environment: "T",
         contentsContext: false,
         idContext: true,
-        level: function (level) {
-            return level.substr(0, 1);
-        },
+        level: true,
         pid: true,
-        date: function () {
-            return moment().format("DD/MM/YY HH:mm:ss:ms").toString();
-        },
-        inBetweenDuration: true
+        inBetweenDuration: true,
+        extraFormatter: (obj: any) => {
+            obj.severity = obj.level == 'FATAL' ? 'CRITICAL' : obj.level;
+            delete obj.level;
+            return obj;
+        }
     }),
     levels: {
         DEBUG: true,
         INFO: true,
         WARNING: true,
         ERROR: true,
-        FATAL: true
+        FATAL: true,
+        PROGRESS: true
     }
 };
 
 let tracer = new logger.Logger({
-    namespace: "logger",
+    namespace: "myApp",
     environment: "TEST",
     streams: {
         stdOut: stdOutStream
@@ -48,15 +49,15 @@ tracer.addStream("rollbar", {
         INFO: false,
         WARNING: true,
         ERROR: true,
-        FATAL: true
+        FATAL: true,
+        PROGRESS: true
     }
 });
 
 let error: CustomError = new logger.CustomError("errorTest", "this is an error message", {info: "abc"});
 let errObject: CustomErrorPlainObject = error.toObject();
 
-
 tracer.log(errObject);
 // tracer.log("hello year %y", moment().format("YYYY"));
 // tracer.warn("hello year %y", moment().format("YYYY"));
-tracer.error(error);
+tracer.fatal(error);
