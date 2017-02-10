@@ -20,8 +20,26 @@ module.exports = function createFormatter(opts) {
         pid: true,
         date: "DD/MM/YY HH:mm UTC", //can be a boolean, string or a cb(date)
         inBetweenDuration: true,
-        displayLineNumber: true
+        displayLineNumber: true,
+        arraySampling: 30
     });
+
+
+    function samplingArray(arr) {
+        if (arr.length <= opts.arraySampling)
+            return arr;
+        let jump = Math.ceil(arr.length / 3 + 1),
+            nArray = {};
+        for (let i = 0; i < opts.arraySampling; i++) {
+            let n = i * jump;
+            if (n > (arr.length - 1)) {
+                nArray[arr.length - 1] = arr[arr.length - 1];
+                break;
+            }
+            nArray[n] = arr[n];
+        }
+        return nArray;
+    };
 
     if (opts.context) { //alias for opts.contentsContext
         opts.contentsContext = opts.context;
@@ -178,6 +196,8 @@ module.exports = function createFormatter(opts) {
                 formatted[key] = value;
             }
         }
+        else if (type == "array")
+            formatted = samplingArray(obj);
         else if (type == "error") {
             if (!obj.isCustomError)
                 obj = new CustomError().use(obj);
@@ -198,14 +218,18 @@ module.exports = function createFormatter(opts) {
             formatted = obj.toJSON();
 
         let keysSet = _.keys(formatted),
+            keysSetLength = keysSet.length,
             kString,
             currentSpace = genSpace(initSpace, spaceString, nSpaces) + "|", //sub-level
             pref = "";
 
-        if (!keysSet.length)
+        if (type == 'array')
+            keysSetLength = obj.length + (obj.length != keysSetLength ? ' (sampled)' : '' );
+
+        if (!keysSetLength)
             pref = "empty ";
         else
-            pref = "size=" + keysSet.length + ",";
+            pref = "size=" + keysSetLength + ",";
 
         if (type == "function") {
             out += stylize('[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']', noColor || colorsByType[type] || true);
@@ -326,7 +350,7 @@ module.exports = function createFormatter(opts) {
 
             line += stylize(b, colorFromLevel[level]) + "  ";
         }
-        
+
         if (opts.date) {
             if (_.isString(opts.date))
                 optFormattedVal = moment.utc().format(opts.date);

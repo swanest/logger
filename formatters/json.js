@@ -13,7 +13,7 @@ module.exports = function createFormatter(opts) {
         internalPrefix: '__#',
         environment: true, //can be a a boolean, string or a cb(environment)
         namespace: true, //can be a boolean, string or a cb(namespace)
-        contentsContext: false,
+        contentsContext: true,
         idContext: true,
         level: true, //can be a boolean or cb(level)
         pid: true,
@@ -143,7 +143,7 @@ module.exports = function createFormatter(opts) {
             else if (_.isFunction(opts.namespace))
                 optFormattedVal = opts.namespace(this.config.namespace)
             else
-                optFormattedVal = "#" + this.config.namespace;
+                optFormattedVal = this.config.namespace;
             line['namespace'] = optFormattedVal;
         }
 

@@ -78,11 +78,13 @@ CustomError.prototype = Object.create(Error.prototype, {
 CustomError.prototype.use = function use(e) {
     var err = _.get(e, 'error') || e; //Either a native errorJS or an JSONError
     if (err && (err instanceof Error || e.error != void 0 || e.isCustomError)) {
+
         err.message && (this.message = err.message);
         err.stack && (this.stack = err.stack);
         err.codeString && (this.codeString = err.codeString);
         err.code && (this.code = err.code);
         err.level = (this.level = err.level);
+
         if (err.info) {
             if (this.info)
                 _.extend(this.info, err.info)
@@ -95,6 +97,7 @@ CustomError.prototype.use = function use(e) {
             else
                 this.info = err.extra;
         }
+
     }
     else if (_.isPlainObject(err)) {
         if (this.info)

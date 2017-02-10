@@ -18,7 +18,8 @@ var tracerA = new logLib.Logger({
                 pid: true,
                 date: "DD/MM/YY HH:mm UTC",
                 inBetweenDuration: true,
-                displayLineNumber: {rootDirName: 'rockfox-lib'}
+                displayLineNumber: {rootDirName: 'rockfox-lib'},
+                arraySampling:3
             }),
             levels: {
                 DEBUG: env == "development",
@@ -40,6 +41,8 @@ map.set("lala", new CustomError("test", {inner: {inner: 2}}));
 map.set("ok", {ok: 1});
 tracerA.log("Test map", map);
 
+
+tracerA.log('sampled', [1,2,3,4,5,6,7,8,9,10]);
 
 let message = {
     body: [{test: 'ok'}]

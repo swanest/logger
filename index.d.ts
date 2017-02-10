@@ -31,6 +31,7 @@ declare namespace D {
                 date: boolean | string | (()=>string);
                 inBetweenDuration?: boolean;
                 displayLineNumber?: boolean | {rootDirName: string};
+                arraySampling?: number;
             }
             interface Generator {
                 (opts?: Options): Formatter;
