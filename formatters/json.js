@@ -229,7 +229,7 @@ module.exports = function createFormatter(opts) {
                 line.args[i] = objectFormatter({obj: args[i]});
 
             if (args[i] instanceof Error)
-                line.message = args[i].message;
+                line.message = args[i].stack;
             else if (_.isString(line.args[i]) && !line.message)
                 line.message = line.args[i];
 
