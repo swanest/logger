@@ -124,7 +124,7 @@ module.exports = function createFormatter(opts) {
     };
 
 
-    return function beautifulFormatter(args, level, extra) {
+    return function jsonFormatter(args, level, extra) {
         args = _.clone(args);
         var line = {}, formattedContext, optFormattedVal;
         if (opts.environment) {
@@ -230,8 +230,11 @@ module.exports = function createFormatter(opts) {
 
             if (args[i] instanceof Error)
                 line.message = args[i].stack;
-            else if (_.isString(line.args[i]) && !line.message)
-                line.message = line.args[i];
+            else if (_.isString(line.args[i])) {
+                if (line.message == void 0)
+                    line.message = "";
+                line.message += line.args[i];
+            }
 
         }
 
