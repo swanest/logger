@@ -46,14 +46,15 @@ module.exports = function createFormatter(opts) {
         delete opts.context;
     }
 
-    var colors = {
+    var colors = { // see http://misc.flogisoft.com/bash/tip_colors_and_formatting
             'bold': [1],
             'italic': [3],
             'underline': [4],
             'inverse': [7, 1, 31, 47],
             'white': [1, 37],
             'black': [1, 30],
-            'blue': [34],
+            'blue': [94],
+            'darkBlue': [34],
             'cyan': [36],
             'green': [1, 32],
             'magenta': [35],
