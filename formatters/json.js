@@ -213,7 +213,7 @@ module.exports = function createFormatter(opts) {
         //Otherwise we just display
         line.timestamp = new Date();
         line.args = {};
-        line.message;
+        line.message = '';
         for (var i = 0; i < args.length; i++) {
             if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
                 line.args[i] = (args[i].toString());
@@ -227,15 +227,11 @@ module.exports = function createFormatter(opts) {
                 line.args[i] = "undefined";
             else if (_.isObject(args[i]))
                 line.args[i] = objectFormatter({obj: args[i]});
-
             if (args[i] instanceof Error)
-                line.message = args[i].stack;
+                line.message += args[i].stack + ' ';
             else if (_.isString(line.args[i])) {
-                if (line.message == void 0)
-                    line.message = "";
-                line.message += line.args[i];
+                line.message += line.args[i] + ' ';
             }
-
         }
 
         if (level != 'PROGRESS')
