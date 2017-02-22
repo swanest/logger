@@ -19,7 +19,7 @@ var tracerA = new logLib.Logger({
                 date: "DD/MM/YY HH:mm UTC",
                 inBetweenDuration: true,
                 displayLineNumber: {rootDirName: 'rockfox-lib'},
-                arraySampling:3
+                arraySampling: 10
             }),
             levels: {
                 DEBUG: true,
@@ -40,12 +40,27 @@ if (process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'staging')
 
 
 let map = new Map();
-map.set("lala", new CustomError("test", {inner: {inner: 2}}));
+
+let cE2 = new CustomError('error2').use(2),
+    cE3 = new CustomError(JSON.parse(JSON.stringify(cE2))),
+    cE4 = new CustomError(new Error('blalala'), {over:'ok'});
+
+//console.log(JSON.stringify(cE3, null, 2));
+
+tracerA.log('reused', cE3);
+tracerA.log('reused', cE4);
+
+tracerA.log("unclassified", new CustomError('error1')
+    .override(1,
+    cE2
+    ), 6, true, ['arrayString']);
+
+map.set("lala", new CustomError("test", {inner: {inner: 2}}).use({more: {more: 'lala'}}, 'test', 1));
 map.set("ok", {ok: 1});
 tracerA.log("Test map", map);
 
 
-tracerA.log('sampled', [1,2,3,4,5,6,7,8,9,10]);
+tracerA.log('sampled', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 56, 696, 4, 5, 6, 73, 45, 6, 7, 33, 6, 7, 494]);
 
 let message = {
     body: [{test: 'ok'}]

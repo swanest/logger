@@ -458,6 +458,9 @@ module.exports = function createFormatter(opts) {
                 error = args[k];
         }
 
+        if(error && error.info && error.info.unclassified)
+            unclassified = _.clone(error.info.unclassified);
+
         //If error, we unified the log
         if (error) {
             for (var i = 0; i < args.length; i++) {
