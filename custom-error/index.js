@@ -106,7 +106,7 @@ CustomError.prototype.use = function use(e) {
             this.info = err;
     }
     else
-        throw new CustomError("unusableError");
+        throw new CustomError("unusableInput", {input: e});
     return this;
 };
 
