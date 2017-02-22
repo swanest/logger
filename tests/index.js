@@ -22,7 +22,7 @@ var tracerA = new logLib.Logger({
                 arraySampling:3
             }),
             levels: {
-                DEBUG: env == "development",
+                DEBUG: true,
                 INFO: true,
                 WARNING: true,
                 ERROR: true,
@@ -34,6 +34,9 @@ var tracerA = new logLib.Logger({
 
 if (global.CustomError == void 0)
     global.CustomError = logLib.CustomError;
+
+if (process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'staging')
+    tracerA.addStream('stdOut', {formatter: require("../index").formatters.json()});
 
 
 let map = new Map();
@@ -164,4 +167,3 @@ setTimeout(function () {
     tracerB.removeStream("stdOut", "rollbar");
     tracerB.log("won't be shown");
 }, 5000);
-
