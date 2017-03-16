@@ -220,5 +220,9 @@ export declare class CustomError extends Error {
 
     toJSON(filter?: ((err: this)=>D.CustomErrorPlainObject)): D.CustomErrorPlainObject
 
-    use(e: Error | D.CustomErrorPlainObject): this
+    use(...items: Array<any>): this
+
+    override(...items: Array<any>): this
+
+
 }
