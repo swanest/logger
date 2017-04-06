@@ -151,7 +151,7 @@ module.exports = function createFormatter(opts) {
             line['idContext'] = _.get(this.config, "context.id");
 
         if (opts.level)
-            line['level'] = _.isFunction(opts.level) ? opts.level(level) : level;
+            line['level'] = _.isFunction(opts.level) ? opts.level(level) : (level == 'KPI' ? 'INFO' : level);
 
         if (opts.pid)
             line['pid'] = process.pid;
@@ -176,7 +176,7 @@ module.exports = function createFormatter(opts) {
             line['logLocation'] = b;
         }
 
-        if (opts.inBetweenDuration)
+        if (opts.inBetweenDuration && (!args || args[0] !== '_KPI_'))
             line['inBetweenDuration'] = moment.utc().diff(this.config.lastLogged, "ms") + "ms";
 
         if (opts.contentsContext && _.get(this.config, "context.contents")) {
@@ -214,29 +214,35 @@ module.exports = function createFormatter(opts) {
         line.timestamp = new Date();
         line.args = {};
         line.message = '';
-        for (var i = 0; i < args.length; i++) {
-            if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
-                line.args[i] = (args[i].toString());
-            else if (_.isFunction(args[i]))
-                line.args[i] = '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
-            else if (_.isRegExp(args[i]))
-                line.args[i] = args[i].toString();
-            else if (_.isNull(args[i]))
-                line.args[i] = "null";
-            else if (_.isUndefined(args[i]))
-                line.args[i] = "undefined";
-            else if (_.isObject(args[i]))
-                line.args[i] = objectFormatter({obj: args[i]});
-            if (args[i] instanceof Error)
-                line.message += args[i].stack + ' ';
-            else if (_.isString(line.args[i])) {
-                line.message += line.args[i] + ' ';
+        if (level == "KPI") {
+            line.message = args[1];
+            line.kpi = args[2];
+            delete line.args;
+        } else {
+            for (var i = 0; i < args.length; i++) {
+                if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
+                    line.args[i] = (args[i].toString());
+                else if (_.isFunction(args[i]))
+                    line.args[i] = '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
+                else if (_.isRegExp(args[i]))
+                    line.args[i] = args[i].toString();
+                else if (_.isNull(args[i]))
+                    line.args[i] = "null";
+                else if (_.isUndefined(args[i]))
+                    line.args[i] = "undefined";
+                else if (_.isObject(args[i]))
+                    line.args[i] = objectFormatter({obj: args[i]});
+                if (args[i] instanceof Error)
+                    line.message += args[i].stack + ' ';
+                else if (_.isString(line.args[i])) {
+                    line.message += line.args[i] + ' ';
+                }
             }
         }
 
         if (level != 'PROGRESS')
             return {
-                streamName: (level == "DEBUG" || level == "INFO") ? "stdout" : "stderr",
+                streamName: (level == "DEBUG" || level == "INFO" || level == "KPI") ? "stdout" : "stderr",
                 output: JSON.stringify(_.isFunction(opts.extraFormatter) ? opts.extraFormatter(line) : line, null, 0) + '\n'
             };
 

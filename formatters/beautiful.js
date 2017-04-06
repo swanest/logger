@@ -67,7 +67,8 @@ module.exports = function createFormatter(opts) {
             WARNING: 'yellow',
             ERROR: 'red',
             FATAL: 'inverse',
-            PROGRESS: "green"
+            PROGRESS: 'green',
+            KPI: 'cyan',
         };
 
     //Empty-line creator
@@ -507,27 +508,31 @@ module.exports = function createFormatter(opts) {
 
         }
 
-        //Otherwise we just display
-        for (var i = 0; i < args.length; i++) {
-            if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
-                line += (args[i].toString());
-            else if (_.isFunction(args[i]))
-                line += '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
-            else if (_.isRegExp(args[i]))
-                line += args[i].toString();
-            else if (_.isNull(args[i]))
-                line += "null";
-            else if (_.isUndefined(args[i]))
-                line += "undefined";
-            else if (_.isObject(args[i]))
-                line += objectFormatter({obj: args[i], spaceString: " ", nSpaces: 2});
-            line += " ";
+        if (level == "KPI") {
+            line += args[1] + " ";
+        } else {
+            //Otherwise we just display
+            for (var i = 0; i < args.length; i++) {
+                if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
+                    line += (args[i].toString());
+                else if (_.isFunction(args[i]))
+                    line += '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
+                else if (_.isRegExp(args[i]))
+                    line += args[i].toString();
+                else if (_.isNull(args[i]))
+                    line += "null";
+                else if (_.isUndefined(args[i]))
+                    line += "undefined";
+                else if (_.isObject(args[i]))
+                    line += objectFormatter({obj: args[i], spaceString: " ", nSpaces: 2});
+                line += " ";
+            }
         }
 
         line += N(opts.linesBetweenLogs);
 
         return {
-            streamName: (level == "DEBUG" || level == "INFO") ? "stdout" : "stderr",
+            streamName: (level == "DEBUG" || level == "INFO" || level == "KPI") ? "stdout" : "stderr",
             output: line
         };
 

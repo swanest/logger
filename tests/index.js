@@ -108,6 +108,14 @@ var tracerB = tracerA.context(request, function (req) {
     return req.client + " " + req.task;
 });
 
+var tracerC = tracerA.context(request, function (req) {
+    return req.client + " " + req.task;
+});
+
+tracerC.kpi('stepOne');
+tracerC.kpi('stepTwo');
+tracerC.info('Blabla'); // should not include times of stepOne and stepTwo
+
 
 //or tracerB = tracerA.context(request, "a string"); or tracerA.context("idContext")
 

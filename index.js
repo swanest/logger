@@ -14,7 +14,8 @@ var defaultConfig = {
                 WARNING: true,
                 ERROR: true,
                 FATAL: true,
-                PROGRESS: true
+                PROGRESS: true,
+                KPI: true,
             }
         }
     }
@@ -151,7 +152,22 @@ Logger.prototype.context = function (contents, id) {
     this.children.push(child);
     child.parent = this;
     child.bufferMode = this.bufferMode;
+    child.startTime = process.hrtime();
+    child.previousStepTime = child.startTime;
     return child;
+};
+
+Logger.prototype.kpi = function (stepName) {
+    const diffStart = process.hrtime(this.startTime),
+        diffPrev = process.hrtime(this.previousStepTime),
+        msStart = Math.round(diffStart[0] * 1e6 + diffStart[1] / 1e3) / 1e3,
+        msPrev = Math.round(diffPrev[0] * 1e6 + diffPrev[1] / 1e3) / 1e3;
+    this.previousStepTime = process.hrtime();
+    return sendToStreams.call(this, {
+        0: '_KPI_',
+        1: stepName + ' took ' + msPrev + 'ms (total: ' + msStart + 'ms)',
+        2: {fromStartMs: msStart, durationMs: msPrev}
+    }, "KPI");
 };
 
 Logger.prototype.unlink = function () {
