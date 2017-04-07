@@ -31,24 +31,28 @@ module.exports = function createFormatter(opts) {
 
         var error, extra = {}, message = "", codeString, code, unclassified = [];
 
-        for (var i = 0; i < args.length; i++) {
-            if (_.isPlainObject(args[i]))
-                _.extend(extra, args[i]);
-            else if (_.isString(args[i]) && args[i].length < 140) {
-                if (!message)
-                    message = args[i];
-                else
-                    message += " " + args[i];
-            }
-            else if (args[i] instanceof Error) {
-                error = args[i], code = args[i].code, codeString = args[i].codeString;
-                _.extend(extra, args[i].extra);
-                _.extend(extra, args[i].info);
-            }
-            else {
-                unclassified.push(args[i]);
+
+        if (level != "KPI") {
+            for (var i = 0; i < args.length; i++) {
+                if (_.isPlainObject(args[i]))
+                    _.extend(extra, args[i]);
+                else if (_.isString(args[i]) && args[i].length < 140) {
+                    if (!message)
+                        message = args[i];
+                    else
+                        message += " " + args[i];
+                }
+                else if (args[i] instanceof Error) {
+                    error = args[i], code = args[i].code, codeString = args[i].codeString;
+                    _.extend(extra, args[i].extra);
+                    _.extend(extra, args[i].info);
+                }
+                else {
+                    unclassified.push(args[i]);
+                }
             }
         }
+
         if (message)
             extra.message = message;
         if (codeString)
@@ -57,6 +61,12 @@ module.exports = function createFormatter(opts) {
             extra.code = code;
         if (unclassified.length)
             extra.unclassified = unclassified;
+
+        if (level == "KPI") {
+            extra.message = args[1];
+            extra.kpi = args[2];
+            extra.codeString = "KPI";
+        }
 
         if (opts.context && _.get(this.config, "context.contents")) {
             extra.context = _.isFunction(opts.context) ? opts.context(this.config.context.contents) : this.config.context.contents;
@@ -69,7 +79,8 @@ module.exports = function createFormatter(opts) {
             ERROR: "error",
             WARNING: "warning",
             INFO: "info",
-            DEBUG: "debug"
+            DEBUG: "debug",
+            KPI: "info",
         };
 
         return {
