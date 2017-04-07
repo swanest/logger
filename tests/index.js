@@ -32,6 +32,8 @@ var tracerA = new logLib.Logger({
     }
 });
 
+tracerA.kpi("abc");
+
 if (global.CustomError == void 0)
     global.CustomError = logLib.CustomError;
 

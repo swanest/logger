@@ -175,6 +175,8 @@ export declare class Logger {
 
     fatal(...args: Array<any>): this
 
+    kpi(name: string): this
+
     progress(decimal?: number): this
 
     copy(overloadConfig?: D.Config.Setup): Logger

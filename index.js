@@ -158,6 +158,9 @@ Logger.prototype.context = function (contents, id) {
 };
 
 Logger.prototype.kpi = function (stepName) {
+    if (!this.startTime) {
+        return;
+    }
     const diffStart = process.hrtime(this.startTime),
         diffPrev = process.hrtime(this.previousStepTime),
         msStart = Math.round(diffStart[0] * 1e6 + diffStart[1] / 1e3) / 1e3,
