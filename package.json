@@ -1,9 +1,16 @@
 {
   "name": "sw-logger",
-  "version": "1.0.19",
+  "version": "1.1.0",
   "description": "Complete and simple-to-use logger",
   "main": "index.js",
   "types": "index.d.ts",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/swanest/logger.git"
+  },
+  "bugs": {
+    "url" : "https://github.com/swanest/logger/issues"
+  },
   "dependencies": {
     "lodash": "^4.7.0",
     "moment": "^2.12.0",
