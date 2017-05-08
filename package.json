@@ -1,6 +1,6 @@
 {
   "name": "sw-logger",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Complete and simple-to-use logger",
   "main": "index.js",
   "types": "index.d.ts",
