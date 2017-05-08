@@ -87,8 +87,12 @@ function useThat(feedArray, method) {
                             this.info = {};
                         _[method](this.info, err[k]);
                     }
-                    else
-                        _[method](this, {[k]: err[k]});
+                    else {
+                        if (err.message != void 0 && err.message != '' && this.message === this.codeString) {
+                            this.message = err.message;
+                        }
+                        _[method](this, { [k]: err[k] });
+                    }
                 }
             }
         }
