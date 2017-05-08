@@ -491,7 +491,7 @@ module.exports = function createFormatter(opts) {
             if (codeString)
                 line += stylize("(" + (code ? code + ":" : "") + codeString + ")", "red");
 
-            line += stylize(error.stack, "red");
+            line += " " + stylize(error.stack, "red");
             if (_.keys(extra).length)
                 line += objectFormatter({
                     obj: extra,

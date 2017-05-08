@@ -192,3 +192,5 @@ setTimeout(function () {
     tracerB.removeStream("stdOut", "rollbar");
     tracerB.log("won't be shown");
 }, 5000);
+
+tracerA.fatal(new CustomError('myError', {abc: 123}).override(new Error('correct message')));
