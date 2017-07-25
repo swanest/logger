@@ -1,10 +1,15 @@
 var _ = require("lodash"),
     moment = require("moment"),
     util = require("util"),
-    CustomError = require("../custom-error");
+    CustomError = require("../custom-error"),
+    jsonLogger = require("./json");
 
 
 module.exports = function createFormatter(opts) {
+
+    if (process.env.LOGGER_FORMAT === 'json') {
+        return jsonLogger(opts);
+    }
 
     if (opts == void 0)
         opts = {};

@@ -1,7 +1,7 @@
-var _ = require("lodash"),
-    moment = require("moment"),
-    util = require("util"),
-    CustomError = require("../custom-error");
+var _ = require('lodash'),
+    moment = require('moment'),
+    util = require('util'),
+    CustomError = require('../custom-error');
 
 
 module.exports = function createFormatter(opts) {
@@ -29,34 +29,34 @@ module.exports = function createFormatter(opts) {
 
     //Get the specific type
     var customTypeOf = function (inp) {
-        if (_.isString(inp) && moment.utc(inp, "YYYY-MM-DDTHH:mm:ss.SSSZ", true).isValid())
-            return "ISOStringDate";
+        if (_.isString(inp) && moment.utc(inp, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true).isValid())
+            return 'ISOStringDate';
         else if (_.isDate(inp))
-            return "JSDate";
+            return 'JSDate';
         else if (inp instanceof moment().__proto__.constructor)
-            return "momentJSDate";
+            return 'momentJSDate';
         else if (_.isArray(inp))
-            return "array";
+            return 'array';
         else if (_.isFinite(inp))
-            return "number";
+            return 'number';
         else if (_.isNaN(inp))
-            return "NaN";
+            return 'NaN';
         else if (_.isFunction(inp))
-            return "function";
+            return 'function';
         else if (_.isUndefined(inp))
-            return "undefined";
+            return 'undefined';
         else if (_.isNull(inp))
-            return "null";
+            return 'null';
         else if (_.isBoolean(inp))
-            return "boolean";
+            return 'boolean';
         else if (_.isRegExp(inp))
-            return "regExp";
+            return 'regExp';
         else if (inp instanceof Error)
-            return "error";
+            return 'error';
         else if (inp && _.isFunction(inp.getTimestamp) && _.isFunction(inp.toString) && inp.toString().length == 24)
-            return "ObjectId";
+            return 'ObjectId';
         else if (_.isPlainObject(inp))
-            return "plainObject";
+            return 'plainObject';
         else {
             return typeof inp;
         }
@@ -76,9 +76,9 @@ module.exports = function createFormatter(opts) {
                 return it.object == obj;
             });
             if (found !== void 0) {
-                return "(ref. to '" + found.path + "' " + (_.get(obj, "constructor.name") || "") + ")";
+                return '(ref. to \'' + found.path + '\' ' + (_.get(obj, 'constructor.name') || '') + ')';
             }
-            seenObjects.push({object: obj, key: prevKey, path: path})
+            seenObjects.push({ object: obj, key: prevKey, path: path })
         }
         let formatted = obj;
         //Native display transformation if available
@@ -88,7 +88,7 @@ module.exports = function createFormatter(opts) {
                 formatted[key] = value;
             }
         }
-        else if (type == "error") {
+        else if (type == 'error') {
             if (!obj.isCustomError)
                 obj = new CustomError().use(obj);
             formatted = obj.toJSON().error;
@@ -99,22 +99,22 @@ module.exports = function createFormatter(opts) {
             formatted = obj.toJSON();
         let keysSet = _.keys(formatted),
             kString,
-            pref = "";
+            pref = '';
         if (!keysSet.length)
-            pref = "empty ";
+            pref = 'empty ';
         else
-            pref = "size=" + keysSet.length + ",";
-        if (type == "function") {
+            pref = 'size=' + keysSet.length + ',';
+        if (type == 'function') {
             return '[Function: ' + (obj.name === '' ? 'anonymous' : obj.name) + ']';
         }
-        else if (type != "error" && type != "object" && type != "array" && type != "plainObject") {
-            return formatted + " [" + type + "]";
+        else if (type != 'error' && type != 'object' && type != 'array' && type != 'plainObject') {
+            return formatted + ' [' + type + ']';
         }
-        out[opts.internalPrefix + 'type'] = (_.get(obj, "constructor.name") || "") + "[" + pref + type + "]";
+        out[opts.internalPrefix + 'type'] = (_.get(obj, 'constructor.name') || '') + '[' + pref + type + ']';
         keysSet.forEach(function (k) {
             type = customTypeOf(obj[k]);
             kString = k;
-            out[k] = objectFormatter.call({recursive: true, seenObjects: _.clone(seenObjects)}, {
+            out[k] = objectFormatter.call({ recursive: true, seenObjects: _.clone(seenObjects) }, {
                 obj: formatted[k],
                 prevKey: k,
                 path: path + '.' + k
@@ -147,8 +147,8 @@ module.exports = function createFormatter(opts) {
             line['namespace'] = optFormattedVal;
         }
 
-        if (opts.idContext && _.get(this.config, "context.id"))
-            line['idContext'] = _.get(this.config, "context.id");
+        if (opts.idContext && _.get(this.config, 'context.id'))
+            line['idContext'] = _.get(this.config, 'context.id');
 
         if (opts.level)
             line['level'] = _.isFunction(opts.level) ? opts.level(level) : (level == 'KPI' ? 'INFO' : level);
@@ -162,7 +162,7 @@ module.exports = function createFormatter(opts) {
                 stack = extra.stack, lineStack = 3;
             else
                 stack = new Error().stack, lineStack = 4;
-            let logLineDetails = stack.split("at ")[lineStack].trim().replace(')', '');
+            let logLineDetails = stack.split('at ')[lineStack].trim().replace(')', '');
             let b = logLineDetails.split('\\').pop().split('/');
             if (_.isString(_.get(opts.displayLineNumber, 'rootDirName'))) {
                 let i = b.length - 1;
@@ -177,9 +177,9 @@ module.exports = function createFormatter(opts) {
         }
 
         if (opts.inBetweenDuration && (!args || args[0] !== '_KPI_'))
-            line['inBetweenDuration'] = moment.utc().diff(this.config.lastLogged, "ms") + "ms";
+            line['inBetweenDuration'] = moment.utc().diff(this.config.lastLogged, 'ms') + 'ms';
 
-        if (opts.contentsContext && _.get(this.config, "context.contents")) {
+        if (opts.contentsContext && _.get(this.config, 'context.contents')) {
             formattedContext = _.isFunction(opts.contentsContext) ? opts.contentsContext(this.config.context.contents) : this.config.context.contents;
             if (_.isPlainObject(formattedContext)) {
                 formattedContext = objectFormatter({
@@ -199,7 +199,7 @@ module.exports = function createFormatter(opts) {
                 argsIndexesToRemove.push(index);
                 var replacingValue = args[index];
                 if (_.isPlainObject(replacingValue))
-                    replacingValue = util.inspect(replacingValue, {showHidden: true, depth: null});
+                    replacingValue = util.inspect(replacingValue, { showHidden: true, depth: null });
                 if (_.isFunction(replacingValue))
                     replacingValue = '[Function: ' + (replacingValue.name === '' ? 'anonymous' : replacingValue.name) + ']';
                 return replacingValue;
@@ -214,24 +214,24 @@ module.exports = function createFormatter(opts) {
         line.timestamp = new Date();
         line.args = {};
         line.message = '';
-        if (level == "KPI") {
+        if (level == 'KPI') {
             line.message = args[1];
             line.kpi = args[2];
             delete line.args;
         } else {
             for (var i = 0; i < args.length; i++) {
                 if (_.isBoolean(args[i]) || _.isString(args[i]) || _.isFinite(args[i]))
-                    line.args[i] = (args[i].toString());
+                    line.args[i] = args[i];
                 else if (_.isFunction(args[i]))
                     line.args[i] = '[Function: ' + (args[i].name === '' ? 'anonymous' : args[i].name) + ']';
                 else if (_.isRegExp(args[i]))
                     line.args[i] = args[i].toString();
                 else if (_.isNull(args[i]))
-                    line.args[i] = "null";
+                    line.args[i] = 'null';
                 else if (_.isUndefined(args[i]))
-                    line.args[i] = "undefined";
+                    line.args[i] = 'undefined';
                 else if (_.isObject(args[i]))
-                    line.args[i] = objectFormatter({obj: args[i]});
+                    line.args[i] = args[i];
                 if (args[i] instanceof Error)
                     line.message += args[i].stack + ' ';
                 else if (_.isString(line.args[i])) {
@@ -240,11 +240,24 @@ module.exports = function createFormatter(opts) {
             }
         }
 
-        if (level != 'PROGRESS')
+        if (level != 'PROGRESS') {
+            var cache = [];
             return {
-                streamName: (level == "DEBUG" || level == "INFO" || level == "KPI") ? "stdout" : "stderr",
-                output: JSON.stringify(_.isFunction(opts.extraFormatter) ? opts.extraFormatter(line) : line, null, 0) + '\n'
+                streamName: (level == 'DEBUG' || level == 'INFO' || level == 'KPI') ? 'stdout' : 'stderr',
+                output: JSON.stringify(_.isFunction(opts.extraFormatter) ? opts.extraFormatter(line) : line, function (key, value) {
+                    if (typeof value === 'object' && value !== null) {
+                        if (cache.indexOf(value) !== -1) {
+                            // Circular reference found, discard key
+                            return;
+                        }
+                        // Store value in our collection
+                        cache.push(value);
+                    }
+                    return value;
+                }, 0) + '\n'
             };
+            cache = null;
+        }
 
         //process.stdout.write()
         //console.log(line);
