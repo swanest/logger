@@ -50,7 +50,17 @@ Logger.prototype.disable = function (recursive) {
         this.children.forEach(function (child) {
             child.disable(recursive);
         });
-    this.config.isEnabled = false;
+    if (this.parent && this.parent.children instanceof Array) {
+        const indexInParent = this.parent.children.indexOf(this);
+        this.parent.children.splice(indexInParent, 1);
+    }
+    config.isEnabled = null;
+    config.lastLogged = null;
+    this.config = null;
+    this.buffer = null;
+    this.bufferMode = null;
+    this.children = null;
+    this.parent = null;
     return VOIDER;
 };
 
