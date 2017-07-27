@@ -1,7 +1,7 @@
-var _ = require("lodash"),
+const _ = require("lodash"),
     moment = require("moment");
 
-var defaultConfig = {
+const defaultConfig = {
     environment: process.env.NODE_ENV || "development",
     context: null, //{id:xxxx, contents:req}
     streams: {
@@ -20,6 +20,8 @@ var defaultConfig = {
         }
     }
 };
+
+const VOIDER = {}; // This object is reused when a logger is disabled to avoid filling memory with many objects.
 
 function Logger(config) {
     if (config == void 0)
@@ -49,7 +51,7 @@ Logger.prototype.disable = function (recursive) {
             child.disable(recursive);
         });
     this.config.isEnabled = false;
-    return this;
+    return VOIDER;
 };
 
 function sendToStreams(args, level, extra) {
@@ -190,6 +192,13 @@ Logger.prototype.removeStream = function () {
         delete this.config.streams[arguments[s]];
     return this;
 };
+
+function recursiveVoid() {
+    return VOIDER;
+}
+for (fn in Logger.prototype) {
+    VOIDER[fn] = recursiveVoid;
+}
 
 module.exports = {
     Logger: Logger,

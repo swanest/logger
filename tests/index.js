@@ -31,6 +31,8 @@ var tracerA = new logLib.Logger({
         }
     }
 });
+// tracerA.log('Disabling logger');
+// tracerA = tracerA.disable();
 
 tracerA.kpi("abc");
 
