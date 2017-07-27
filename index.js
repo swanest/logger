@@ -54,8 +54,6 @@ Logger.prototype.disable = function (recursive) {
         const indexInParent = this.parent.children.indexOf(this);
         this.parent.children.splice(indexInParent, 1);
     }
-    config.isEnabled = null;
-    config.lastLogged = null;
     this.config = null;
     this.buffer = null;
     this.bufferMode = null;
