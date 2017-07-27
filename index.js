@@ -50,10 +50,8 @@ Logger.prototype.disable = function (recursive) {
         this.children.forEach(function (child) {
             child.disable(recursive);
         });
-    if (this.parent && this.parent.children instanceof Array) {
-        const indexInParent = this.parent.children.indexOf(this);
-        this.parent.children.splice(indexInParent, 1);
-    }
+    if (this.parent != void 0 && this.parent.children instanceof Array)
+        _.pull(this.parent.children, this);
     this.config = null;
     this.buffer = null;
     this.bufferMode = null;
@@ -184,7 +182,7 @@ Logger.prototype.kpi = function (stepName) {
 };
 
 Logger.prototype.unlink = function () {
-    if (_.get(this.parent != void 0))
+    if (this.parent != void 0)
         _.pull(this.parent.children, this);
     this.bufferMode = false;
     return this;
