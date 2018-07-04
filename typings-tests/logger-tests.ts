@@ -1,6 +1,4 @@
-import * as logger from "../index";
-import * as moment from "moment";
-
+import * as logger from '../index';
 import CustomError = logger.CustomError;
 import CustomErrorPlainObject = logger.D.CustomErrorPlainObject;
 
@@ -10,7 +8,7 @@ let stdOutStream: logger.D.Config.stdOutStreamConfig = {
     formatter: logger.formatters.json({
         //date: true,
         namespace: 'M',
-        environment: "T",
+        environment: 'T',
         contentsContext: false,
         idContext: true,
         level: true,
@@ -20,7 +18,7 @@ let stdOutStream: logger.D.Config.stdOutStreamConfig = {
             obj.severity = obj.level == 'FATAL' ? 'CRITICAL' : obj.level;
             delete obj.level;
             return obj;
-        }
+        },
     }),
     levels: {
         DEBUG: true,
@@ -28,33 +26,19 @@ let stdOutStream: logger.D.Config.stdOutStreamConfig = {
         WARNING: true,
         ERROR: true,
         FATAL: true,
-        PROGRESS: true
-    }
+        PROGRESS: true,
+    },
 };
 
 let tracer = new logger.Logger({
-    namespace: "myApp",
-    environment: "TEST",
+    namespace: 'myApp',
+    environment: 'TEST',
     streams: {
-        stdOut: stdOutStream
-    }
-})
-
-//Add a new stream
-tracer.addStream("rollbar", {
-    formatter: logger.formatters.rollbar(),
-    stream: logger.streams.rollbar("71e6837f9c3445e9937ea16e80b1822e", "TEST"),
-    levels: {
-        DEBUG: false,
-        INFO: false,
-        WARNING: true,
-        ERROR: true,
-        FATAL: true,
-        PROGRESS: true
-    }
+        stdOut: stdOutStream,
+    },
 });
 
-let error: CustomError = new logger.CustomError("errorTest", "this is an error message", {info: "abc"});
+let error: CustomError = new logger.CustomError('errorTest', 'this is an error message', {info: 'abc'});
 let errObject: CustomErrorPlainObject = error.toObject();
 
 tracer.log(errObject);

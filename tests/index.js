@@ -143,24 +143,6 @@ tracerB.addStream("stdOut", {
 });
 
 
-//Add a new stream
-tracerB.addStream("rollbar", {
-    formatter: logLib.formatters.rollbar({
-        context: function (request) {
-            return request.extraInfo;
-        }
-    }),
-    stream: logLib.streams.rollbar("a16c17a00cdf46918e2e9d1a1d0847cb", env),
-    levels: {
-        DEBUG: false, //not necessary to send everything to rollbar
-        INFO: false,
-        WARNING: true || env == "staging" || env == "production",
-        ERROR: true || env == "staging" || env == "production",
-        FATAL: true || env == "staging" || env == "production"
-    }
-});
-
-
 var circular = {
     key: {
         val: 1
@@ -191,7 +173,7 @@ tracerA.log("will be shown");
 
 setTimeout(function () {
     tracerA.log("TracerB wont log anything anymore...");
-    tracerB.removeStream("stdOut", "rollbar");
+    tracerB.removeStream("stdOut");
     tracerB.log("won't be shown");
 }, 5000);
 

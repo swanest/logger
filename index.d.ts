@@ -61,34 +61,11 @@ declare namespace D {
                 (opts?: Options): Formatter;
             }
         }
-
-        namespace Rollbar {
-            interface Format extends Common.Format {
-                error?: Error | null | undefined;
-                level: "critical" | "error" | "warning" | "info" | "debug";
-                custom: Object,
-                message: string
-            }
-            interface Formatter extends Common.Formatter {
-                (args: any, level: Common.level): Format;
-            }
-            interface Options {
-                context: boolean | ((contextContents: Object)=>any);
-            }
-            interface Generator {
-                (opts?: Options): Formatter;
-            }
-        }
     }
 
     namespace Streams {
         interface Stream {
             write(data: Formatters.Common.Format): void;
-        }
-        namespace Rollbar {
-            interface Generator {
-                (apiKey: string, environment: string): Stream;
-            }
         }
     }
 
@@ -108,16 +85,12 @@ declare namespace D {
         interface stdOutStreamConfig extends StreamConfig {
             formatter: Formatters.Beautiful.Formatter | Formatters.Json.Formatter;
         }
-        interface rollbarStreamConfig extends StreamConfig {
-            formatter: Formatters.Rollbar.Formatter
-        }
         interface Setup {
             namespace: string;
             environment?: string;
             context?: {id?: string; contents: Object};
             streams?: {
                 stdOut?: stdOutStreamConfig;
-                rollbar?: rollbarStreamConfig;
             };
         }
     }
@@ -193,14 +166,12 @@ export declare class Logger {
 }
 
 export var formatters: {
-    readonly beautiful: D.Formatters.Beautiful.Generator,
-    readonly json: D.Formatters.Json.Generator,
-    readonly rollbar: D.Formatters.Rollbar.Generator
+    readonly beautiful: D.Formatters.Beautiful.Generator
+    readonly json: D.Formatters.Json.Generator
 };
 
 export var streams: {
     readonly stdout: D.Streams.Stream
-    readonly rollbar: D.Streams.Rollbar.Generator
 };
 
 //CustomError exports
